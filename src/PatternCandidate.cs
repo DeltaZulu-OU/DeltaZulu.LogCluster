@@ -27,8 +27,8 @@ internal sealed class PatternCandidate
     /// LogClusterMiner.MergeLowDiversityVariants), used to group candidates that differ only at
     /// that one position.
     /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
+    /// <param name="position">The zero-based anchor position to remove.</param>
+    /// <returns>A new anchor array without the specified position.</returns>
     public int[] AnchorsWithout(int position)
     {
         var result = new int[anchors.Length - 1];
@@ -54,13 +54,13 @@ internal sealed class PatternCandidate
     /// extraTrailingAnchors are applied) marks additional individual anchor occurrences that
     /// should also fold into the adjacent gap, from MergeLowDiversityVariants.
     /// </summary>
-    /// <param name="tokens"></param>
-    /// <param name="separators"></param>
-    /// <param name="frequentWords"></param>
-    /// <param name="dictionary"></param>
-    /// <param name="extraLeadingAnchors"></param>
-    /// <param name="extraTrailingAnchors"></param>
-    /// <param name="absorbedPositions"></param>
+    /// <param name="tokens">The token identifiers from a matching record.</param>
+    /// <param name="separators">The whitespace separators aligned with <paramref name="tokens" />.</param>
+    /// <param name="frequentWords">A lookup indicating which token identifiers are anchors.</param>
+    /// <param name="dictionary">The dictionary used to resolve token identifiers for gap samples.</param>
+    /// <param name="extraLeadingAnchors">The number of leading anchor occurrences to absorb into the first gap.</param>
+    /// <param name="extraTrailingAnchors">The number of trailing anchor occurrences to absorb into the last gap.</param>
+    /// <param name="absorbedPositions">Internal anchor positions to absorb into adjacent gaps.</param>
     public void ObserveGaps(ReadOnlySpan<int> tokens, ReadOnlySpan<string> separators, ReadOnlySpan<bool> frequentWords, TokenDictionary dictionary, int extraLeadingAnchors = 0, int extraTrailingAnchors = 0, HashSet<int>? absorbedPositions = null)
     {
         var gapIndex = 0;
@@ -122,12 +122,24 @@ internal sealed class PatternCandidate
     /// candidate's own anchor sequence; fold them into the adjacent boundary gap's word range
     /// instead of treating them as anchors.
     /// </summary>
-    /// <param name="dropFirst"></param>
-    /// <returns></returns>
+    /// <param name="dropFirst">True to remove the first anchor; false to remove the last anchor.</param>
+    /// <returns>A candidate key built from the anchor sequence after dropping the requested edge anchor.</returns>
     public CandidateKey ReducedKey(bool dropFirst) => new(dropFirst ? anchors.AsSpan(1) : anchors.AsSpan(0, anchors.Length - 1));
 
+    /// <summary>
+    /// Builds the grouping key used to compare candidates after one anchor position is wildcarded.
+    /// </summary>
+    /// <param name="position">The zero-based anchor position to remove from the template.</param>
+    /// <returns>A candidate key built from the remaining anchors.</returns>
     public CandidateKey TemplateKey(int position) => new(AnchorsWithout(position));
 
+    /// <summary>
+    /// Converts the candidate and its collected evidence into public output data.
+    /// </summary>
+    /// <param name="recordCount">The total number of records processed by the miner.</param>
+    /// <param name="dictionary">The dictionary used to resolve anchor token identifiers.</param>
+    /// <param name="options">The scoring and rendering options to apply.</param>
+    /// <returns>The rendered candidate output.</returns>
     public CandidateOutput ToOutput(int recordCount, TokenDictionary dictionary, LogClusterOptions options)
     {
         var renderedGaps = _gaps.Select(g => g.ToOutput()).ToArray();
@@ -175,11 +187,11 @@ internal sealed class PatternCandidate
     /// final entry, the modal trailing separator); reused as the join before whichever rendered
     /// part (gap placeholder or anchor literal) falls at that boundary.
     /// </summary>
-    /// <param name="anchors"></param>
-    /// <param name="gaps"></param>
-    /// <param name="separators"></param>
-    /// <param name="dictionary"></param>
-    /// <returns></returns>
+    /// <param name="anchors">The fixed anchor token identifiers to render.</param>
+    /// <param name="gaps">The gap outputs between and around the anchors.</param>
+    /// <param name="separators">The modal separators to insert before rendered parts at each gap boundary.</param>
+    /// <param name="dictionary">The dictionary used to resolve anchor token identifiers.</param>
+    /// <returns>The LogCluster-style pattern string.</returns>
     private static string RenderLogCluster(int[] anchors, GapOutput[] gaps, string[] separators, TokenDictionary dictionary)
     {
         var builder = new StringBuilder();

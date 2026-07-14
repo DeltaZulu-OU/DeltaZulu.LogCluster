@@ -8,15 +8,15 @@ internal static class CandidateScorer
     /// --weight-specificity let callers retune the mix for log types dissimilar to whatever
     /// informed those defaults, rather than silently trusting an unstated tuning.
     /// </summary>
-    /// <param name="support"></param>
-    /// <param name="recordCount"></param>
-    /// <param name="anchorCount"></param>
-    /// <param name="gaps"></param>
-    /// <param name="weightSupport"></param>
-    /// <param name="weightAnchor"></param>
-    /// <param name="weightGapConsistency"></param>
-    /// <param name="weightSpecificity"></param>
-    /// <returns></returns>
+    /// <param name="support">The number of records represented by the candidate.</param>
+    /// <param name="recordCount">The total number of records processed.</param>
+    /// <param name="anchorCount">The number of fixed anchor tokens in the candidate.</param>
+    /// <param name="gaps">The rendered gap statistics for the candidate.</param>
+    /// <param name="weightSupport">The multiplier for the support-strength component.</param>
+    /// <param name="weightAnchor">The multiplier for the anchor-quality component.</param>
+    /// <param name="weightGapConsistency">The multiplier for the gap-consistency component.</param>
+    /// <param name="weightSpecificity">The multiplier for the pattern-specificity component.</param>
+    /// <returns>The total and component scores for the candidate.</returns>
     public static CandidateScore Score(int support, int recordCount, int anchorCount, IReadOnlyList<GapOutput> gaps, double weightSupport, double weightAnchor, double weightGapConsistency, double weightSpecificity)
     {
         var supportStrength = Math.Min(100, 100.0 * Math.Log(1 + support) / Math.Log(1 + recordCount));

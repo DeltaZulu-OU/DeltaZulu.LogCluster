@@ -8,7 +8,7 @@ namespace DeltaZulu.LogCluster;
 /// position wildcarded). The two are never combined on the same route (see
 /// MergeLowDiversityVariants' scoping comment).
 /// </summary>
-/// <param name="Leading"></param>
-/// <param name="Trailing"></param>
-/// <param name="AbsorbedPositions"></param>
+/// <param name="Leading">The number of leading anchor occurrences to fold into the first gap.</param>
+/// <param name="Trailing">The number of trailing anchor occurrences to fold into the last gap.</param>
+/// <param name="AbsorbedPositions">The zero-based internal anchor positions to fold into adjacent gaps, or null when none are absorbed.</param>
 internal readonly record struct EvidenceRoute(int Leading, int Trailing, HashSet<int>? AbsorbedPositions);

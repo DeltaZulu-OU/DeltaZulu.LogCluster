@@ -8,17 +8,17 @@ namespace DeltaZulu.LogCluster;
 /// last token. This lets rendering reproduce the delimiter actually observed at each anchor
 /// boundary instead of always rejoining with a single ASCII space.
 /// </summary>
-/// <param name="SequenceNumber"></param>
-/// <param name="Tokens"></param>
-/// <param name="Separators"></param>
+/// <param name="SequenceNumber">The input sequence number for the tokenized record.</param>
+/// <param name="Tokens">The token identifiers in message order.</param>
+/// <param name="Separators">The whitespace separators surrounding the tokens.</param>
 internal sealed record TokenizedRecord(long SequenceNumber, int[] Tokens, string[] Separators)
 {
     /// <summary>
     /// Losslessly rebuilds the original message text for --outliers reporting: Tokens and
     /// Separators together capture exactly what Tokenize() consumed.
     /// </summary>
-    /// <param name="dictionary"></param>
-    /// <returns></returns>
+    /// <param name="dictionary">The dictionary used to resolve token identifiers.</param>
+    /// <returns>The reconstructed original message text.</returns>
     public string Reconstruct(TokenDictionary dictionary)
     {
         var builder = new StringBuilder();
@@ -36,11 +36,11 @@ internal sealed record TokenizedRecord(long SequenceNumber, int[] Tokens, string
     /// the result; "stream" leaves it lazy and re-enumerates recordSource() through it once per
     /// pass, so records are tokenized on the fly and never all held in memory at once.
     /// </summary>
-    /// <param name="records"></param>
-    /// <param name="dictionary"></param>
-    /// <param name="maxRecords"></param>
-    /// <param name="maxInputBytes"></param>
-    /// <returns></returns>
+    /// <param name="records">The records to tokenize.</param>
+    /// <param name="dictionary">The dictionary used to resolve token identifiers.</param>
+    /// <param name="maxRecords">The maximum number of records allowed before an exception is thrown.</param>
+    /// <param name="maxInputBytes">The maximum cumulative message length allowed before an exception is thrown.</param>
+    /// <returns>A lazy sequence of tokenized records.</returns>
     public static IEnumerable<TokenizedRecord> Stream(IEnumerable<LogRecord> records, TokenDictionary dictionary, long maxRecords, long maxInputBytes)
     {
         long recordCount = 0;

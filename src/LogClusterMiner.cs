@@ -1,9 +1,16 @@
 namespace DeltaZulu.LogCluster;
 
+/// <summary>
+/// Mines recurring fixed-token patterns from log records and produces ranked candidate rules.
+/// </summary>
 public sealed class LogClusterMiner
 {
     private readonly LogClusterOptions options;
 
+    /// <summary>
+    /// Initializes a miner with the supplied configuration.
+    /// </summary>
+    /// <param name="options">The mining options to apply.</param>
     public LogClusterMiner(LogClusterOptions options)
     {
         this.options = options;
@@ -15,9 +22,9 @@ public sealed class LogClusterMiner
     /// above it, streaming trades CPU (re-tokenizing each pass) for a memory ceiling set by the
     /// still-finite TokenDictionary/candidate structures rather than by recordCount record count.
     /// </summary>
-    /// <param name="estimatedInputBytes"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
+    /// <param name="estimatedInputBytes">The estimated raw input size in bytes, or <see langword="null" /> when unknown.</param>
+    /// <param name="options">The mining options, including any explicit strategy override and input limits.</param>
+    /// <returns><see langword="true" /> when the miner should stream records; otherwise, <see langword="false" />.</returns>
     public static bool ShouldStream(long? estimatedInputBytes, LogClusterOptions options)
     {
         if (options.ForceMaterialize is { } forced)
@@ -48,10 +55,16 @@ public sealed class LogClusterMiner
     /// in memory at once. The two strategies differ only in whether tokenizedPass() below is
     /// backed by a cached array or a fresh re-enumeration of recordSource().
     /// </summary>
-    /// <param name="records"></param>
-    /// <returns></returns>
+    /// <param name="records">The records to mine.</param>
+    /// <returns>The mining result containing ranked candidates and optional outlier information.</returns>
     public MiningResult Mine(IEnumerable<LogRecord> records) => Mine(() => records, estimatedInputBytes: null);
 
+    /// <summary>
+    /// Mines records supplied by a repeatable source function, using streaming when the input estimate exceeds the memory heuristic.
+    /// </summary>
+    /// <param name="recordSource">A function that returns a fresh enumerable of input records for each mining pass.</param>
+    /// <param name="estimatedInputBytes">The estimated raw input size in bytes, or <see langword="null" /> when unknown.</param>
+    /// <returns>The mining result containing ranked candidates and optional outlier information.</returns>
     public MiningResult Mine(Func<IEnumerable<LogRecord>> recordSource, long? estimatedInputBytes)
     {
         var dictionary = new TokenDictionary();
@@ -151,9 +164,9 @@ public sealed class LogClusterMiner
     /// reindexing the edge route, which isn't worth the correctness risk for this heuristic.
     /// </para>
     /// </summary>
-    /// <param name="candidates"></param>
-    /// <param name="routes"></param>
-    /// <param name="threshold"></param>
+    /// <param name="candidates">The candidate map to update with merged low-diversity variants.</param>
+    /// <param name="routes">The evidence routes that describe how merged records should fold absorbed anchors into gaps.</param>
+    /// <param name="threshold">The maximum distinct-value-to-support ratio that permits a merge.</param>
     private static void MergeLowDiversityVariants(Dictionary<CandidateKey, PatternCandidate> candidates, Dictionary<CandidateKey, EvidenceRoute> routes, double threshold)
     {
         var alreadyEdgeMerged = new HashSet<PatternCandidate>(routes.Keys.Select(k => candidates[k]));
@@ -223,8 +236,8 @@ public sealed class LogClusterMiner
     /// already-merged key that some longer candidate reduces to by more than one token is left
     /// as a separate candidate rather than chaining merges across a larger gap.
     /// </summary>
-    /// <param name="candidates"></param>
-    /// <param name="routes"></param>
+    /// <param name="candidates">The candidate map to update with shifted candidate merges.</param>
+    /// <param name="routes">The evidence routes that describe how merged records should fold edge anchors into gaps.</param>
     private static void MergeShiftedCandidates(Dictionary<CandidateKey, PatternCandidate> candidates, Dictionary<CandidateKey, EvidenceRoute> routes)
     {
         var originals = candidates.Values.Distinct().OrderBy(c => c.AnchorCount).ToArray();
