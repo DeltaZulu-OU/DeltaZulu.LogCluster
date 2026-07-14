@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/DeltaZulu.LogCluster.csproj" />
+  <Project Path="tests/DeltaZulu.LogCluster.Tests.csproj" />
+</Solution>
