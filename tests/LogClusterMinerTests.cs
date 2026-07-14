@@ -60,7 +60,10 @@ public class LogClusterMinerTests
     [TestMethod]
     public void InternalMultiwordGaps_AreRenderedAsUnresolvedSketchesNotRestParsers()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
+
         var records = new[] {
             new LogRecord(1, "Interface Ethernet 1 down at node node1", "test"),
             new LogRecord(2, "Interface Ethernet 1 2 down at node node2", "test"),
@@ -83,8 +86,17 @@ public class LogClusterMinerTests
             new LogRecord(2, "Interface Ethernet 1 down at node node2", "test"),
         };
 
-        var defaultOptions = LogClusterOptions.Parse(["--min-support", "2"]);
-        var customOptions = LogClusterOptions.Parse(["--min-support", "2", "--weight-support", "1", "--weight-anchor", "0", "--weight-gaps", "0", "--weight-specificity", "0"]);
+        var defaultOptions = new LogClusterOptions {
+            MinSupport = 2
+        };
+
+        var customOptions = new LogClusterOptions {
+            MinSupport = 2,
+            WeightSupport = 1,
+            WeightAnchor = 0,
+            WeightGapConsistency = 0,
+            WeightSpecificity = 0
+        };
 
         var defaultScore = new LogClusterMiner(defaultOptions).Mine(records).Candidates.Single().Score;
         var customScore = new LogClusterMiner(customOptions).Mine(records).Candidates.Single().Score;
@@ -96,7 +108,10 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_DoesNotMergeHighDiversitySingleTokenVariants()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2", "--wweight-threshold", "0.01"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2,
+            WordWeightThreshold = 0.01
+        };
         var records = new[] {
             new LogRecord(1, "alert from ip1 triggered", "test"),
             new LogRecord(2, "alert from ip1 triggered", "test"),
@@ -113,7 +128,9 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_DoesNotTrackOutliersWhenOptionIsOff()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
         var records = new[] {
             new LogRecord(1, "Interface down node1", "test"),
             new LogRecord(2, "Interface down node2", "test"),
@@ -135,8 +152,8 @@ public class LogClusterMinerTests
             new LogRecord(3, "Interface Ethernet 1 down at node node3", "test"),
         };
 
-        var materialized = new LogClusterMiner(LogClusterOptions.Parse(["--materialize"])).Mine(() => records, estimatedInputBytes: long.MaxValue);
-        var streamed = new LogClusterMiner(LogClusterOptions.Parse(["--stream"])).Mine(() => records, estimatedInputBytes: 0);
+        var materialized = new LogClusterMiner(new LogClusterOptions { ForceMaterialize = true }).Mine(() => records, estimatedInputBytes: long.MaxValue);
+        var streamed = new LogClusterMiner(new LogClusterOptions { ForceMaterialize = false }).Mine(() => records, estimatedInputBytes: 0);
 
         Assert.AreEqual(materialized.RecordCount, streamed.RecordCount);
         Assert.HasCount(materialized.Candidates.Count, streamed.Candidates);
@@ -149,7 +166,9 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_MergesLowDiversitySingleTokenVariantsIntoOneCandidate()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
         var records = new[] {
             new LogRecord(1, "alert from ip1 triggered", "test"),
             new LogRecord(2, "alert from ip1 triggered", "test"),
@@ -175,7 +194,9 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_MergesTrailingAnchorShiftedVariantsIntoOneCandidate()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
         var records = new[] {
             new LogRecord(1, "Interface down node1", "test"),
             new LogRecord(2, "Interface down node2", "test"),
@@ -197,7 +218,9 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_PreservesOriginalTabDelimiterInRenderedPattern()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
         var records = new[] {
             new LogRecord(1, "user1\tlogin\tsuccess", "test"),
             new LogRecord(2, "user2\tlogin\tsuccess", "test"),
@@ -212,7 +235,10 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_ReportsLinesMatchingNoSurvivingCandidateAsOutliers()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2", "--outliers"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2,
+            ShowOutliers = true
+        };
         var records = new[] {
             new LogRecord(1, "Interface down node1", "test"),
             new LogRecord(2, "Interface down node2", "test"),
@@ -228,7 +254,7 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_ThrowsWhenInputBytesExceedMaxInputBytes()
     {
-        var options = LogClusterOptions.Parse(["--max-input-bytes", "10"]);
+        var options = new LogClusterOptions { MaxInputBytes = 2 };
         var records = new[] {
             new LogRecord(1, "this line is definitely over ten bytes", "test"),
         };
@@ -239,7 +265,7 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_ThrowsWhenRecordCountExceedsMaxRecords()
     {
-        var options = LogClusterOptions.Parse(["--max-records", "2"]);
+        var options = new LogClusterOptions { MaxRecords = 2 };
         var records = new[] {
             new LogRecord(1, "line one", "test"),
             new LogRecord(2, "line two", "test"),
@@ -252,7 +278,9 @@ public class LogClusterMinerTests
     [TestMethod]
     public void Mine_TrailingGapWithContentKeepsSeparatorBeforePlaceholder()
     {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
         var records = new[] {
             new LogRecord(1, "Interface down node1", "test"),
             new LogRecord(2, "Interface down node2", "test"),
@@ -268,14 +296,14 @@ public class LogClusterMinerTests
     [TestMethod]
     public void ShouldStream_ForcedOptionsOverrideTheHeuristic()
     {
-        Assert.IsFalse(LogClusterMiner.ShouldStream(estimatedInputBytes: long.MaxValue, LogClusterOptions.Parse(["--materialize"])));
-        Assert.IsTrue(LogClusterMiner.ShouldStream(estimatedInputBytes: 0, LogClusterOptions.Parse(["--stream"])));
+        Assert.IsFalse(LogClusterMiner.ShouldStream(estimatedInputBytes: long.MaxValue, new LogClusterOptions { ForceMaterialize = true }));
+        Assert.IsTrue(LogClusterMiner.ShouldStream(estimatedInputBytes: 0, new LogClusterOptions { ForceMaterialize = false }));
     }
 
     [TestMethod]
     public void ShouldStream_LargeEstimateWithoutOverrideStreams()
     {
-        var options = LogClusterOptions.Parse([]);
+        var options = new LogClusterOptions();
         Assert.IsTrue(LogClusterMiner.ShouldStream(estimatedInputBytes: long.MaxValue / 8, options));
         Assert.IsFalse(LogClusterMiner.ShouldStream(estimatedInputBytes: 1, options));
     }
