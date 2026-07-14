@@ -3,14 +3,16 @@ namespace DeltaZulu.LogCluster.Tests;
 [TestClass]
 public class LogClusterMinerTests
 {
+    /// <summary>
+    /// No motif regex tolerates the internal space a 2+-word sample always contains once
+    /// joined, so a gap that ever sees 2+ words can never accumulate a parser vote for that
+    /// observation; MaxWords > 1 therefore always drags confidence below 1.0 and this branch
+    /// always fires. This test pins that invariant directly at the GapStatistics level,
+    /// rather than only indirectly through LogClusterMiner.Mine's rendering.
+    /// </summary>
     [TestMethod]
     public void GapStatistics_MultiWordGap_IsAlwaysForcedToRestRegardlessOfConfidence()
     {
-        // No motif regex tolerates the internal space a 2+-word sample always contains once
-        // joined, so a gap that ever sees 2+ words can never accumulate a parser vote for that
-        // observation; MaxWords > 1 therefore always drags confidence below 1.0 and this branch
-        // always fires. This test pins that invariant directly at the GapStatistics level,
-        // rather than only indirectly through LogClusterMiner.Mine's rendering.
         var dictionary = new TokenDictionary();
         var gap = new GapStatistics(maxSamples: 8);
         var first = dictionary.GetOrAdd("10", 0, 2);
