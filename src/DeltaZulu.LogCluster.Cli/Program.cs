@@ -1,14 +1,23 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace DeltaZulu.LogCluster.Cli
 {
-    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
-    [RequiresDynamicCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
     internal static class Program
     {
-        private static readonly JsonSerializerOptions jsonOpts = new JsonSerializerOptions { WriteIndented = true };
+        /// <summary>
+        /// Serializes mining output for --json. The project builds with PublishAot, which disables
+        /// System.Text.Json's reflection-based serializer at the runtimeconfig level (this affects
+        /// plain `dotnet run`, not only AOT-published binaries), so a source-generated
+        /// JsonSerializerContext is required rather than a plain JsonSerializerOptions.
+        /// </summary>
+        /// <param name="result">The mining result to serialize.</param>
+        /// <param name="includeOutliers">Whether to wrap candidates with outlier count and samples.</param>
+        /// <returns>The serialized JSON text.</returns>
+        internal static string SerializeJson(MiningResult result, bool includeOutliers) => includeOutliers
+            ? JsonSerializer.Serialize(new OutlierMiningOutput(result.Candidates, result.OutlierCount, result.OutlierSamples), LogClusterJsonContext.Default.OutlierMiningOutput)
+            : JsonSerializer.Serialize(result.Candidates, LogClusterJsonContext.Default.IReadOnlyListCandidateOutput);
 
         private static int Main(string[] args)
         {
@@ -56,14 +65,7 @@ namespace DeltaZulu.LogCluster.Cli
                 }
                 if (options.Json)
                 {
-                    if (options.ShowOutliers)
-                    {
-                        Console.WriteLine(JsonSerializer.Serialize(new { result.Candidates, result.OutlierCount, result.OutlierSamples }, jsonOpts));
-                    }
-                    else
-                    {
-                        Console.WriteLine(JsonSerializer.Serialize(result.Candidates, jsonOpts));
-                    }
+                    Console.WriteLine(SerializeJson(result, options.ShowOutliers));
                 }
                 else
                 {
@@ -388,4 +390,17 @@ namespace DeltaZulu.LogCluster.Cli
 
         public long Next() => ++_value;
     }
+
+    /// <summary>
+    /// The --outliers JSON shape: candidates alongside the outlier count and bounded samples.
+    /// </summary>
+    /// <param name="Candidates">The ranked candidate patterns that survived filtering.</param>
+    /// <param name="OutlierCount">The number of records that matched no surviving candidate.</param>
+    /// <param name="OutlierSamples">A bounded set of sample outlier records.</param>
+    internal sealed record OutlierMiningOutput(IReadOnlyList<CandidateOutput> Candidates, int OutlierCount, IReadOnlyList<string> OutlierSamples);
+
+    [JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+    [JsonSerializable(typeof(IReadOnlyList<CandidateOutput>))]
+    [JsonSerializable(typeof(OutlierMiningOutput))]
+    internal sealed partial class LogClusterJsonContext : JsonSerializerContext;
 }

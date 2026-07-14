@@ -1,3 +1,5 @@
+using DeltaZulu.LogCluster.Cli;
+
 namespace DeltaZulu.LogCluster.Tests;
 
 [TestClass]
@@ -76,6 +78,34 @@ public class LogClusterMinerTests
         Assert.Contains("/* unresolved gap:", candidate.LiblognormRule);
         Assert.DoesNotContain("%field1:rest% down at node", candidate.LiblognormRule);
         Assert.IsNotEmpty(candidate.RuleWarnings);
+    }
+
+    /// <summary>
+    /// Regression test: the rule builder used to label this warning with the executable
+    /// %fieldN% counter, which is only incremented when a placeholder is actually emitted.
+    /// Because the unresolved gap emits a comment instead of a placeholder, the counter stayed
+    /// unadvanced and got reused by the next real field -- e.g. the warning said "Internal gap 1"
+    /// while the rule's actual %field1% referred to the unrelated, perfectly valid trailing gap.
+    /// The warning must instead be numbered by the gap's own position so it never collides with
+    /// an unrelated %fieldN% placeholder.
+    /// </summary>
+    [TestMethod]
+    public void UnresolvedGapWarning_ReferencesItsOwnGapPositionNotAnUnrelatedFieldNumber()
+    {
+        var options = new LogClusterOptions {
+            MinSupport = 2
+        };
+
+        var records = new[] {
+            new LogRecord(1, "Interface Ethernet 1 down at node node1", "test"),
+            new LogRecord(2, "Interface Ethernet 1 2 down at node node2", "test"),
+        };
+
+        var result = new LogClusterMiner(options).Mine(records);
+        var candidate = result.Candidates.Single(c => c.LogClusterPattern.StartsWith("Interface", StringComparison.Ordinal));
+
+        Assert.AreEqual("Interface Ethernet 1 /* unresolved gap: 0-1 words */ down at node %field1:word%", candidate.LiblognormRule);
+        Assert.Contains("Gap 4 spans 0-1 words", candidate.RuleWarnings.Single());
     }
 
     [TestMethod]
@@ -291,6 +321,46 @@ public class LogClusterMinerTests
 
         Assert.AreEqual("Interface down *{1,1}", candidate.LogClusterPattern);
         Assert.AreEqual("Interface down %field1:word%", candidate.LiblognormRule);
+    }
+
+    /// <summary>
+    /// Regression test: --json used to throw System.InvalidOperationException at runtime
+    /// ("Reflection-based serialization has been disabled for this application") because the CLI
+    /// project sets PublishAot=true, which disables System.Text.Json's reflection-based
+    /// serializer via a runtimeconfig feature switch that applies even to plain `dotnet run`, not
+    /// only to AOT-published binaries. The fix (source-generated LogClusterJsonContext) must
+    /// actually be reachable from a normal JIT run, not just compile.
+    /// </summary>
+    [TestMethod]
+    public void SerializeJson_WithoutOutliers_DoesNotThrowAndUsesCamelCaseFieldNames()
+    {
+        var records = new[] {
+            new LogRecord(1, "Interface down node1", "test"),
+            new LogRecord(2, "Interface down node2", "test"),
+        };
+        var result = new LogClusterMiner(new LogClusterOptions { MinSupport = 2 }).Mine(records);
+
+        var json = Program.SerializeJson(result, includeOutliers: false);
+
+        Assert.Contains("\"support\"", json);
+        Assert.Contains("\"logClusterPattern\"", json);
+        Assert.DoesNotContain("\"Support\"", json);
+    }
+
+    [TestMethod]
+    public void SerializeJson_WithOutliers_IncludesOutlierCountAndSamples()
+    {
+        var records = new[] {
+            new LogRecord(1, "Interface down node1", "test"),
+            new LogRecord(2, "Interface down node2", "test"),
+            new LogRecord(3, "a completely unrelated one-off message", "test"),
+        };
+        var result = new LogClusterMiner(new LogClusterOptions { MinSupport = 2, ShowOutliers = true }).Mine(records);
+
+        var json = Program.SerializeJson(result, includeOutliers: true);
+
+        Assert.Contains("\"outlierCount\": 1", json);
+        Assert.Contains("a completely unrelated one-off message", json);
     }
 
     [TestMethod]

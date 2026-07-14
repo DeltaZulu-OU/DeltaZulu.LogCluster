@@ -165,7 +165,8 @@ internal sealed class PatternCandidate
 
         if (!isTrailing && (gap.MinWords == 0 || gap.MaxWords > 1 || string.IsNullOrEmpty(gap.SuggestedParser)))
         {
-            append($"/* unresolved gap: {gap.MinWords}-{gap.MaxWords} words */", gapIndex); warnings.Add($"Internal gap {field} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable liblognorm parser.");
+            append($"/* unresolved gap: {gap.MinWords}-{gap.MaxWords} words */", gapIndex);
+            warnings.Add($"Gap {gapIndex + 1} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable liblognorm parser.");
             return;
         }
 
