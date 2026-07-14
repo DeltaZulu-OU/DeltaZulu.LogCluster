@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace DeltaZulu.LogCluster;
 
-internal static partial class LiblognormMotifs
+public static partial class LiblognormMotifs
 {
     public const string DateIso = "date-iso";
     public const string Float = "float";

@@ -10,4 +10,8 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DeltaZulu.LogCluster\DeltaZulu.LogCluster.csproj" />
+  </ItemGroup>
+
 </Project>

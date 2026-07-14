@@ -9,8 +9,9 @@
         <PackageReference Include="MSTest.TestAdapter" />
         <PackageReference Include="MSTest.TestFramework" />
     </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\src\DeltaZulu.LogCluster.csproj" />
-  </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\DeltaZulu.LogCluster\DeltaZulu.LogCluster.csproj" />
+    </ItemGroup>
 
 </Project>
