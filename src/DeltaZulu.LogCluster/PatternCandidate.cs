@@ -166,7 +166,11 @@ internal sealed class PatternCandidate
         if (!isTrailing && (gap.MinWords == 0 || gap.MaxWords > 1 || string.IsNullOrEmpty(gap.SuggestedParser)))
         {
             append($"/* unresolved gap: {gap.MinWords}-{gap.MaxWords} words */", gapIndex);
-            warnings.Add($"Gap {gapIndex + 1} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable liblognorm parser.");
+            // gapIndex (not field) identifies the gap: unresolved gaps never consume a field
+            // number, so two unresolved gaps in the same candidate would otherwise both report
+            // the same (stale) field value. gapIndex+1 also matches the 1-based "Gap N" label
+            // Program.cs prints for candidate.Gaps in --verbose output.
+            warnings.Add($"Internal gap {gapIndex + 1} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable liblognorm parser.");
             return;
         }
 
