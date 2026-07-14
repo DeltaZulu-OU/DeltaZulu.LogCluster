@@ -4,6 +4,10 @@
 
 Install the .NET 10 SDK. The project targets `net10.0`, enables nullable reference types and implicit usings, and uses centrally managed test package versions.
 
+## Project purpose
+
+DeltaZulu.LogCluster exists to bring LogCluster-style unstructured log mining into the .NET ecosystem used by DeltaZulu.Platform. The repository should stay usable as both a standalone CLI and a reusable engine for future platform integration. Design changes should preserve the human-in-the-loop contract: the miner suggests message skeletons and parser fields, while maintainers decide which suggestions are safe to adopt.
+
 ## Repository layout
 
 ```text
@@ -42,6 +46,12 @@ printf '%s\n' \
 | dotnet run --project src -- --min-support 2 --verbose
 ```
 
+## Design and documentation expectations
+
+When adding behavior, update documentation with the context a parser author needs: why the feature exists, what output content changes, and how it affects review safety. Prefer explicit warnings and structured fields over silent assumptions when the miner cannot produce an executable parser rule.
+
+The project acknowledges the original Perl LogCluster implementation, the LogClusterC implementation, and related publications as algorithmic references. New code should be an idiomatic C# implementation for DeltaZulu rather than copied source from those repositories.
+
 ## Testing focus
 
 The current tests cover:
@@ -56,6 +66,13 @@ The current tests cover:
 * materialized versus streaming strategy equivalence.
 
 Add tests when changing candidate grouping, scoring, rendering, or CLI parsing because small changes can alter both human-readable and JSON output.
+
+## References for maintainers
+
+* [LogCluster project page](https://ristov.github.io/logcluster/)
+* [ristov/logcluster](https://github.com/ristov/logcluster) - original Perl implementation.
+* [zhugegy/LogClusterC](https://github.com/zhugegy/LogClusterC) - C implementation of the LogCluster algorithm.
+* [IDS 2017 LogClusterC paper](https://ristov.github.io/publications/ids17-logclusterc-web.pdf)
 
 ## Publishing
 

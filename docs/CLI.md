@@ -1,6 +1,6 @@
 # CLI reference
 
-`logcluster` discovers recurring message structures from line-oriented logs and prints ranked candidate patterns.
+`logcluster` discovers recurring message structures from line-oriented logs and prints ranked candidate patterns. It is intended for unstructured logs that do not yet have a reliable parser, giving maintainers a reviewable starting point for DeltaZulu.Platform normalization work.
 
 ## Usage
 
@@ -9,6 +9,18 @@ logcluster [options] [file-or-directory ...]
 ```
 
 If no files or directories are supplied, `logcluster` reads one message per line from standard input. Directory inputs are scanned recursively in ordinal file-name order.
+
+## Operational context
+
+Use the CLI when you have raw samples from a source and need to understand the dominant message shapes before writing or improving a parser. A typical workflow is:
+
+1. collect representative historical log lines,
+2. run `logcluster` with a support threshold that filters one-off noise,
+3. inspect text output or export JSON,
+4. review suggested liblognorm rules and warnings, and
+5. promote validated candidates into parser or normalization configuration.
+
+The command produces suggestions only. Generated rules should be reviewed against source documentation, edge cases, and production samples before they are used in an automated ingest path.
 
 ## Inputs
 
@@ -78,6 +90,10 @@ Candidate fields:
 | `ruleWarnings` | Reasons a rule is a sketch or needs review. |
 | `gaps` | Gap observations, samples, suggested parser, and parser confidence. |
 | `score` | Total score and weighted component scores. |
+
+## Output content
+
+Text and JSON modes both preserve the context needed for review: support counts show how common a candidate is, gap bounds show how much text varied between anchors, samples show representative field values, parser confidence explains liblognorm suggestions, and warnings identify candidates that should remain sketches. This content is designed to be copied into parser development notes or consumed by DeltaZulu.Platform tooling.
 
 ## Examples
 
