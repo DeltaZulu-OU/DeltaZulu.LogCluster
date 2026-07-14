@@ -10,6 +10,39 @@ public sealed class LogClusterMiner
     }
 
     /// <summary>
+    /// Picks the strategy once, before mining starts. Below the safety margin, holding every
+    /// tokenized record in memory is simpler and faster than re-reading from disk three times;
+    /// above it, streaming trades CPU (re-tokenizing each pass) for a memory ceiling set by the
+    /// still-finite TokenDictionary/candidate structures rather than by recordCount record count.
+    /// </summary>
+    /// <param name="estimatedInputBytes"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    public static bool ShouldStream(long? estimatedInputBytes, LogClusterOptions options)
+    {
+        if (options.ForceMaterialize is { } forced)
+        {
+            return !forced;
+        }
+
+        if (estimatedInputBytes is not { } bytes)
+        {
+            return false;
+        }
+
+        var headroom = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+        if (headroom <= 0)
+        {
+            headroom = options.MaxInputBytes;
+        }
+
+        const double tokenizedOverheadFactor = 6.0; // int[] tokens + dictionary entries + candidate bookkeeping vs. raw bytes
+        const double safetyMargin = 0.5;
+        var estimatedMemoryUsage = bytes * tokenizedOverheadFactor;
+        return estimatedMemoryUsage > headroom * safetyMargin;
+    }
+
+    /// <summary>
     /// Reused for both strategies: "materialize" runs this once and caches the array; "stream"
     /// re-invokes it (and re-tokenizes) once per pass, trading CPU for not holding every record
     /// in memory at once. The two strategies differ only in whether tokenizedPass() below is
@@ -57,39 +90,6 @@ public sealed class LogClusterMiner
             .Take(options.MaxCandidates)
             .ToArray();
         return new MiningResult(recordCount, outputs, streaming ? "stream" : "materialize", outliers?.Count ?? 0, outliers?.Samples ?? []);
-    }
-
-    /// <summary>
-    /// Picks the strategy once, before mining starts. Below the safety margin, holding every
-    /// tokenized record in memory is simpler and faster than re-reading from disk three times;
-    /// above it, streaming trades CPU (re-tokenizing each pass) for a memory ceiling set by the
-    /// still-finite TokenDictionary/candidate structures rather than by recordCount record count.
-    /// </summary>
-    /// <param name="estimatedInputBytes"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    public static bool ShouldStream(long? estimatedInputBytes, LogClusterOptions options)
-    {
-        if (options.ForceMaterialize is { } forced)
-        {
-            return !forced;
-        }
-
-        if (estimatedInputBytes is not { } bytes)
-        {
-            return false;
-        }
-
-        var headroom = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        if (headroom <= 0)
-        {
-            headroom = options.MaxInputBytes;
-        }
-
-        const double tokenizedOverheadFactor = 6.0; // int[] tokens + dictionary entries + candidate bookkeeping vs. raw bytes
-        const double safetyMargin = 0.5;
-        var estimatedMemoryUsage = bytes * tokenizedOverheadFactor;
-        return estimatedMemoryUsage > headroom * safetyMargin;
     }
 
     private static void CollectEvidence(IEnumerable<TokenizedRecord> records, bool[] frequentWords, Dictionary<CandidateKey, PatternCandidate> candidates, TokenDictionary dictionary, Dictionary<CandidateKey, EvidenceRoute> routes, OutlierCollector? outliers)

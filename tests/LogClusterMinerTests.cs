@@ -4,54 +4,6 @@ namespace DeltaZulu.LogCluster.Tests;
 public class LogClusterMinerTests
 {
     [TestMethod]
-    public void Mine_TrailingGapWithContentKeepsSeparatorBeforePlaceholder()
-    {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
-        var records = new[] {
-            new LogRecord(1, "Interface down node1", "test"),
-            new LogRecord(2, "Interface down node2", "test"),
-        };
-
-        var result = new LogClusterMiner(options).Mine(records);
-        var candidate = result.Candidates.Single();
-
-        Assert.AreEqual("Interface down *{1,1}", candidate.LogClusterPattern);
-        Assert.AreEqual("Interface down %field1:word%", candidate.LiblognormRule);
-    }
-
-    [TestMethod]
-    public void Mine_ReportsLinesMatchingNoSurvivingCandidateAsOutliers()
-    {
-        var options = LogClusterOptions.Parse(["--min-support", "2", "--outliers"]);
-        var records = new[] {
-            new LogRecord(1, "Interface down node1", "test"),
-            new LogRecord(2, "Interface down node2", "test"),
-            new LogRecord(3, "a completely unrelated one-off message", "test"),
-        };
-
-        var result = new LogClusterMiner(options).Mine(records);
-
-        Assert.AreEqual(1, result.OutlierCount);
-        Assert.AreEqual("a completely unrelated one-off message", result.OutlierSamples.Single());
-    }
-
-    [TestMethod]
-    public void Mine_DoesNotTrackOutliersWhenOptionIsOff()
-    {
-        var options = LogClusterOptions.Parse(["--min-support", "2"]);
-        var records = new[] {
-            new LogRecord(1, "Interface down node1", "test"),
-            new LogRecord(2, "Interface down node2", "test"),
-            new LogRecord(3, "a completely unrelated one-off message", "test"),
-        };
-
-        var result = new LogClusterMiner(options).Mine(records);
-
-        Assert.AreEqual(0, result.OutlierCount);
-        Assert.IsEmpty(result.OutlierSamples);
-    }
-
-    [TestMethod]
     public void GapStatistics_MultiWordGap_IsAlwaysForcedToRestRegardlessOfConfidence()
     {
         // No motif regex tolerates the internal space a 2+-word sample always contains once
@@ -157,6 +109,22 @@ public class LogClusterMinerTests
     }
 
     [TestMethod]
+    public void Mine_DoesNotTrackOutliersWhenOptionIsOff()
+    {
+        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var records = new[] {
+            new LogRecord(1, "Interface down node1", "test"),
+            new LogRecord(2, "Interface down node2", "test"),
+            new LogRecord(3, "a completely unrelated one-off message", "test"),
+        };
+
+        var result = new LogClusterMiner(options).Mine(records);
+
+        Assert.AreEqual(0, result.OutlierCount);
+        Assert.IsEmpty(result.OutlierSamples);
+    }
+
+    [TestMethod]
     public void Mine_MaterializeAndStreamStrategiesProduceIdenticalOutput()
     {
         var records = new[] {
@@ -240,6 +208,22 @@ public class LogClusterMinerTests
     }
 
     [TestMethod]
+    public void Mine_ReportsLinesMatchingNoSurvivingCandidateAsOutliers()
+    {
+        var options = LogClusterOptions.Parse(["--min-support", "2", "--outliers"]);
+        var records = new[] {
+            new LogRecord(1, "Interface down node1", "test"),
+            new LogRecord(2, "Interface down node2", "test"),
+            new LogRecord(3, "a completely unrelated one-off message", "test"),
+        };
+
+        var result = new LogClusterMiner(options).Mine(records);
+
+        Assert.AreEqual(1, result.OutlierCount);
+        Assert.AreEqual("a completely unrelated one-off message", result.OutlierSamples.Single());
+    }
+
+    [TestMethod]
     public void Mine_ThrowsWhenInputBytesExceedMaxInputBytes()
     {
         var options = LogClusterOptions.Parse(["--max-input-bytes", "10"]);
@@ -261,6 +245,22 @@ public class LogClusterMinerTests
         };
 
         Assert.ThrowsExactly<LogClusterInputTooLargeException>(() => new LogClusterMiner(options).Mine(records));
+    }
+
+    [TestMethod]
+    public void Mine_TrailingGapWithContentKeepsSeparatorBeforePlaceholder()
+    {
+        var options = LogClusterOptions.Parse(["--min-support", "2"]);
+        var records = new[] {
+            new LogRecord(1, "Interface down node1", "test"),
+            new LogRecord(2, "Interface down node2", "test"),
+        };
+
+        var result = new LogClusterMiner(options).Mine(records);
+        var candidate = result.Candidates.Single();
+
+        Assert.AreEqual("Interface down *{1,1}", candidate.LogClusterPattern);
+        Assert.AreEqual("Interface down %field1:word%", candidate.LiblognormRule);
     }
 
     [TestMethod]

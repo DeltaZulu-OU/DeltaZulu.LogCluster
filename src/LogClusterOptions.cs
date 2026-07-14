@@ -107,6 +107,7 @@ public sealed record LogClusterOptions
 
                     options = options with { MaxOutlierSamples = maxOutlierSamples };
                     break;
+
                 case "--materialize": options = options with { ForceMaterialize = true }; break;
                 case "--stream": options = options with { ForceMaterialize = false }; break;
 
@@ -145,6 +146,7 @@ public sealed record LogClusterOptions
 
                     options = options with { WeightSpecificity = weightSpecificity };
                     break;
+
                 case "--wweight-threshold":
                     if (++i >= args.Length || !double.TryParse(args[i], NumberStyles.Float, CultureInfo.InvariantCulture, out var wweightThreshold) || wweightThreshold < 0)
                     {
@@ -153,6 +155,7 @@ public sealed record LogClusterOptions
 
                     options = options with { WordWeightThreshold = wweightThreshold };
                     break;
+
                 default:
                     if (args[i].StartsWith('-'))
                     {

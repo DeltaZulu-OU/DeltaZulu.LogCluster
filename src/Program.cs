@@ -9,7 +9,6 @@ namespace DeltaZulu.LogCluster
     {
         private static readonly JsonSerializerOptions jsonOpts = new JsonSerializerOptions { WriteIndented = true };
 
-
         private static int Main(string[] args)
         {
             var options = LogClusterOptions.Parse(args);
