@@ -37,13 +37,19 @@ Run the CLI locally:
 dotnet run --project src -- --help
 ```
 
-Run with a small inline corpus:
+Run with a small inline corpus on Linux:
 
 ```bash
 printf '%s\n' \
   'Interface Ethernet1 down at node edge-a' \
   'Interface Ethernet2 down at node edge-b' \
-| dotnet run --project src -- --min-support 2 --verbose
+| dotnet run --project src/DeltaZulu.LogCluster.Cli --min-support 2 --verbose
+```
+
+And on Windows:
+
+```powershell
+ 'Interface Ethernet1 down at node edge-a', 'Interface Ethernet2 down at node edge-b' | dotnet run --project .\src\DeltaZulu.LogCluster.Cli\ --min-support 2 --verbose
 ```
 
 ## Design and documentation expectations
