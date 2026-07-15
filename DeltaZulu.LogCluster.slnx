@@ -1,6 +1,10 @@
 <Solution>
-  <Project Path="src/DeltaZulu.LogCluster.Cli/DeltaZulu.LogCluster.Cli.csproj" />
-  <Project Path="src/DeltaZulu.LogCluster/DeltaZulu.LogCluster.csproj" />
-  <Project Path="src/DeltaZulu.Suggester/DeltaZulu.Suggester.csproj" />
-  <Project Path="tests/DeltaZulu.LogCluster.Tests.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/DeltaZulu.LogCluster.Cli/DeltaZulu.LogCluster.Cli.csproj" />
+    <Project Path="src/DeltaZulu.LogCluster/DeltaZulu.LogCluster.csproj" />
+    <Project Path="src/DeltaZulu.Suggester/DeltaZulu.Suggester.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DeltaZulu.LogCluster.Tests.csproj" />
+  </Folder>
 </Solution>
