@@ -89,7 +89,7 @@ public sealed class LogClusterMiner
         var survivors = candidates.Values.Distinct().Where(c => c.Support >= options.MinSupport).ToArray();
         foreach (var candidate in survivors)
         {
-            candidate.InitializeGaps(options.MaxSamplesPerGap);
+            candidate.InitializeGaps(options.MaxSamplesPerGap, options.GapSuggestionEngine);
         }
 
         var outliers = options.ShowOutliers ? new OutlierCollector(options.MaxOutlierSamples) : null;

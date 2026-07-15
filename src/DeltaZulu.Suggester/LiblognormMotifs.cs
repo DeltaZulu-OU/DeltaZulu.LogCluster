@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace DeltaZulu.LogCluster;
+namespace DeltaZulu.Suggester;
 
 public static partial class LiblognormMotifs
 {

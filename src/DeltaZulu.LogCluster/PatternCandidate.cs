@@ -37,12 +37,12 @@ internal sealed class PatternCandidate
         return result;
     }
 
-    public void InitializeGaps(int maxSamples)
+    public void InitializeGaps(int maxSamples, IGapSuggestionEngine suggestionEngine)
     {
         var gapCount = anchors.Length + 1;
         for (var i = 0; i < gapCount; i++)
         {
-            _gaps.Add(new GapStatistics(maxSamples));
+            _gaps.Add(new GapStatistics(maxSamples, suggestionEngine));
             _separators.Add(new SeparatorStats());
         }
     }
@@ -150,13 +150,13 @@ internal sealed class PatternCandidate
             Support,
             specificity,
             RenderLogCluster(anchors, renderedGaps, separators, dictionary),
-            RenderRule(anchors, renderedGaps, separators, dictionary, out var isExecutableRule, out var ruleWarnings),
+            RenderRule(anchors, renderedGaps, separators, dictionary, options.GapSuggestionEngine, out var isExecutableRule, out var ruleWarnings),
             isExecutableRule,
             ruleWarnings, renderedGaps,
             score);
     }
 
-    private static void AddRuleGap(Action<string, int> append, int gapIndex, GapOutput gap, bool isTrailing, ref int field, List<string> warnings)
+    private static void AddRuleGap(Action<string, int> append, int gapIndex, GapOutput gap, bool isTrailing, IGapSuggestionEngine suggestionEngine, ref int field, List<string> warnings)
     {
         if (gap.MaxWords == 0)
         {
@@ -174,10 +174,10 @@ internal sealed class PatternCandidate
             return;
         }
 
-        var parser = gap.SuggestedParser ?? (gap.MaxWords == 1 ? LiblognormMotifs.Word : LiblognormMotifs.Rest);
+        var parser = gap.SuggestedParser ?? (gap.MaxWords == 1 ? suggestionEngine.WordParser : suggestionEngine.RestParser);
         if (isTrailing && (gap.MinWords == 0 || gap.MaxWords > 1))
         {
-            parser = LiblognormMotifs.Rest;
+            parser = suggestionEngine.RestParser;
         }
 
         append($"%field{field++}:{parser}%", gapIndex);
@@ -225,7 +225,7 @@ internal sealed class PatternCandidate
         return builder.ToString();
     }
 
-    private static string RenderRule(int[] anchors, GapOutput[] gaps, string[] separators, TokenDictionary dictionary, out bool isExecutable, out IReadOnlyList<string> warnings)
+    private static string RenderRule(int[] anchors, GapOutput[] gaps, string[] separators, TokenDictionary dictionary, IGapSuggestionEngine suggestionEngine, out bool isExecutable, out IReadOnlyList<string> warnings)
     {
         var builder = new StringBuilder();
         void Append(string text, int gapIndex)
@@ -242,11 +242,11 @@ internal sealed class PatternCandidate
 
         for (var i = 0; i < anchors.Length; i++)
         {
-            AddRuleGap(Append, i, gaps[i], isTrailing: false, ref field, ruleWarnings);
+            AddRuleGap(Append, i, gaps[i], isTrailing: false, suggestionEngine, ref field, ruleWarnings);
             Append(EscapeLiteral(dictionary[anchors[i]]), i);
         }
 
-        AddRuleGap(Append, anchors.Length, gaps[^1], isTrailing: true, ref field, ruleWarnings);
+        AddRuleGap(Append, anchors.Length, gaps[^1], isTrailing: true, suggestionEngine, ref field, ruleWarnings);
         isExecutable = ruleWarnings.Count == 0;
         warnings = ruleWarnings;
         return builder.ToString();

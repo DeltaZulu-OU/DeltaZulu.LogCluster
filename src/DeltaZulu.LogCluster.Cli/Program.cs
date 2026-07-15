@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using DeltaZulu.Suggester;
 
 namespace DeltaZulu.LogCluster.Cli
 {
@@ -21,7 +22,7 @@ namespace DeltaZulu.LogCluster.Cli
 
         private static int Main(string[] args)
         {
-            var options = Parse(args);
+            var options = Parse(args) with { GapSuggestionEngine = LiblognormSuggestionEngine.Instance };
             if (options.ShowHelp)
             {
                 PrintUsage();
@@ -187,7 +188,7 @@ namespace DeltaZulu.LogCluster.Cli
                         for (var i = 0; i < candidate.Gaps.Count; i++)
                         {
                             var gap = candidate.Gaps[i];
-                            var parser = gap.SuggestedParser ?? LiblognormMotifs.Rest;
+                            var parser = gap.SuggestedParser ?? options.GapSuggestionEngine.RestParser;
                             Console.WriteLine($"  Gap {i + 1}: words {gap.MinWords}-{gap.MaxWords}, observations {gap.Observations}, parser {parser} ({gap.ParserConfidence:P0})");
                             if (gap.Samples.Count > 0)
                             {

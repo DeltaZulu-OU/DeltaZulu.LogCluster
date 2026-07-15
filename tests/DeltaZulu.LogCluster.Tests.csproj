@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <IsTestProject>true</IsTestProject>
@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\src\DeltaZulu.LogCluster\DeltaZulu.LogCluster.csproj" />
+      <ProjectReference Include="..\src\DeltaZulu.Suggester\DeltaZulu.Suggester.csproj" />
       <ProjectReference Include="..\src\DeltaZulu.LogCluster.Cli\DeltaZulu.LogCluster.Cli.csproj" />
     </ItemGroup>
 

@@ -35,6 +35,8 @@ public sealed record LogClusterOptions
     /// recurring source IPs, not a firehose of one-off values.
     /// </summary>
     public double WordWeightThreshold { get; init; } = 0.5;
+    /// <summary>Gets the engine used to suggest parsers for variable gaps.</summary>
+    public IGapSuggestionEngine GapSuggestionEngine { get; init; } = NullGapSuggestionEngine.Instance;
     /// <summary>Gets a value indicating whether unmatched input records should be reported as outliers.</summary>
     public bool ShowOutliers { get; init; }
     /// <summary>Gets the maximum number of outlier sample lines to retain.</summary>

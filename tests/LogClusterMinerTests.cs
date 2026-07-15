@@ -1,4 +1,6 @@
+using DeltaZulu.LogCluster;
 using DeltaZulu.LogCluster.Cli;
+using DeltaZulu.Suggester;
 
 namespace DeltaZulu.LogCluster.Tests;
 
@@ -16,7 +18,7 @@ public class LogClusterMinerTests
     public void GapStatistics_MultiWordGap_IsAlwaysForcedToRestRegardlessOfConfidence()
     {
         var dictionary = new TokenDictionary();
-        var gap = new GapStatistics(maxSamples: 8);
+        var gap = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance);
         var first = dictionary.GetOrAdd("10", 0, 2);
         var second = dictionary.GetOrAdd("0", 0, 1);
         gap.Observe([first, second], dictionary);
@@ -32,7 +34,7 @@ public class LogClusterMinerTests
     [TestMethod]
     public void GapStatistics_NoObservations_ReturnsNullParserAndZeroConfidence()
     {
-        var output = new GapStatistics(maxSamples: 8).ToOutput();
+        var output = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance).ToOutput();
 
         Assert.AreEqual(0, output.MinWords);
         Assert.AreEqual(0, output.MaxWords);
@@ -45,7 +47,7 @@ public class LogClusterMinerTests
     public void GapStatistics_SingleWordConsistentMotif_KeepsSpecificParserWithFullConfidence()
     {
         var dictionary = new TokenDictionary();
-        var gap = new GapStatistics(maxSamples: 8);
+        var gap = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance);
         foreach (var address in new[] { "10.0.0.1", "10.0.0.2", "10.0.0.3" })
         {
             var token = dictionary.GetOrAdd(address, 0, address.Length);

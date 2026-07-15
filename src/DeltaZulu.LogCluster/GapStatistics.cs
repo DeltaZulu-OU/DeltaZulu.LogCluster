@@ -8,14 +8,21 @@ public sealed class GapStatistics
     private readonly Dictionary<string, int> _parserVotes = new(StringComparer.Ordinal);
     private readonly List<string> _samples;
     private readonly int maxSamples;
+    private readonly IGapSuggestionEngine suggestionEngine;
 
     /// <summary>
     /// Initializes gap statistics with a bounded sample count.
     /// </summary>
     /// <param name="maxSamples">The maximum number of distinct gap samples to retain.</param>
     public GapStatistics(int maxSamples)
+        : this(maxSamples, NullGapSuggestionEngine.Instance)
+    {
+    }
+
+    public GapStatistics(int maxSamples, IGapSuggestionEngine suggestionEngine)
     {
         this.maxSamples = maxSamples;
+        this.suggestionEngine = suggestionEngine;
         _samples = new(maxSamples);
     }
 
@@ -46,7 +53,7 @@ public sealed class GapStatistics
         {
             _samples.Add(sample);
         }
-        foreach (var parser in LiblognormMotifs.Recognize(sample))
+        foreach (var parser in suggestionEngine.Recognize(sample))
         {
             _parserVotes[parser] = _parserVotes.GetValueOrDefault(parser) + 1;
         }
@@ -59,12 +66,12 @@ public sealed class GapStatistics
     public GapOutput ToOutput()
     {
         var min = MinWords == int.MaxValue ? 0 : MinWords;
-        var suggestion = _parserVotes.OrderByDescending(v => v.Value).ThenBy(v => LiblognormMotifs.Priority(v.Key)).FirstOrDefault();
+        var suggestion = _parserVotes.OrderByDescending(v => v.Value).ThenBy(v => suggestionEngine.Priority(v.Key)).FirstOrDefault();
         var parser = suggestion.Key;
         var confidence = Observations == 0 || string.IsNullOrEmpty(parser) ? 0 : suggestion.Value / (double)Observations;
         if (MaxWords > 1 && confidence < 1.0)
         {
-            parser = LiblognormMotifs.Rest;
+            parser = suggestionEngine.RestParser;
         }
 
         return new GapOutput(min, MaxWords, Observations, _samples.ToArray(), string.IsNullOrEmpty(parser) ? null : parser, confidence);
