@@ -237,9 +237,9 @@ The rule renderer is intentionally conservative. Single-token gaps can become sp
 
 ### Parser syntax ownership and DeltaZulu.Normalize
 
-The suggester deliberately keeps liblognorm parser motifs behind `IGapSuggestionEngine` rather than coupling the mining engine to a concrete syntax package. `DeltaZulu.Suggester` currently supplies a compatibility shim for liblognorm motif names and sample-recognition heuristics, while `DeltaZulu.LogCluster` remains responsible only for mining, scoring, and conservative rule placement.
+The suggester deliberately keeps liblognorm parser motifs behind `IGapSuggestionEngine` rather than coupling the mining engine to a concrete syntax package. `DeltaZulu.LogCluster` remains responsible only for mining, scoring, and conservative rule placement, and depends on nothing beyond `IGapSuggestionEngine`.
 
-`DeltaZulu.Normalize` is the intended source for canonical liblognorm parser syntax. The planned integration is to consume Normalize from `DeltaZulu.Suggester` only, preserving the mining core's independence from parser-specific packages. See [Roadmap](ROADMAP.md) for the phased implementation plan and proposed catalog API.
+`DeltaZulu.Normalize` is the canonical source of liblognorm parser syntax. `DeltaZulu.Suggester.LiblognormSuggestionEngine` is a thin adapter over the public `ILiblognormParserCatalog` from `DeltaZulu.Normalize`: parser names (`WordParserName`, `RestParserName`), priorities, sample recognition, and whole-sample validation all come from `LiblognormParserCatalog.Instance`. The suggester no longer defines canonical parser names or validator logic locally. `DeltaZulu.Normalize` is referenced through a git submodule at `external/DeltaZulu.Normalize` because it is not yet published as a package; see the [Development guide](DEVELOPMENT.md). Only `DeltaZulu.Suggester` takes this dependency, preserving the mining core's independence from parser-specific packages. See [Roadmap](ROADMAP.md) for the phased plan and catalog API.
 
 ## Materialized versus streaming execution
 

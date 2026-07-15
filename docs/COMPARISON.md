@@ -34,7 +34,7 @@ DeltaZulu.LogCluster follows the core candidate model used by [LogClusterC](http
 
 * **Output ordering.** LogClusterC's default `O(n²)` selection sort is unstable for equal-support candidates, while arity mode can leave ties in hash-bucket order. `LogClusterMiner.Mine` applies a total deterministic order: score descending, support descending, specificity descending, and pattern text in ordinal ascending order.
 
-* **Parser-oriented output.** `LiblognormMotifs` and `PatternCandidate.RenderRule` add gap-motif detection and liblognorm rule rendering. LogClusterC emits LogCluster-style patterns only and has no equivalent parser-suggestion layer.
+* **Parser-oriented output.** The `LiblognormSuggestionEngine` adapter over the `DeltaZulu.Normalize` parser catalog and `PatternCandidate.RenderRule` add gap-motif detection and liblognorm rule rendering. LogClusterC emits LogCluster-style patterns only and has no equivalent parser-suggestion layer.
 
 ### Practical interpretation
 
@@ -62,7 +62,7 @@ DeltaZulu.LogCluster also follows the core mining model of Risto Vaarandi's orig
 
 * **Candidate ranking.** `logcluster.pl` orders clusters by `Count`, meaning support, in descending order. DeltaZulu.LogCluster applies `CandidateScorer`, which combines support strength, anchor quality, gap consistency, and pattern specificity. The `--weight-*` options configure an original ranking heuristic rather than published LogCluster behavior.
 
-* **Parser-oriented output.** The Perl tool emits LogCluster patterns and support counts. `LiblognormMotifs` and the rule-rendering path in `PatternCandidate.ToOutput` additionally suggest parsers such as `ipv4`, `number`, and `word`, and distinguish executable rules from structural sketches. These capabilities are additions to the mining algorithm.
+* **Parser-oriented output.** The Perl tool emits LogCluster patterns and support counts. The `DeltaZulu.Normalize`-backed suggestion engine and the rule-rendering path in `PatternCandidate.ToOutput` additionally suggest parsers such as `ipv4`, `number`, and `word`, and distinguish executable rules from structural sketches. These capabilities are additions to the mining algorithm.
 
 * **Input and vocabulary preprocessing.** The Perl implementation supports line-level filtering and rewriting through options such as `--lfilter`, `--template`, and `--lcfunc`. It also supports word normalization and word-class generalization through `--wfilter`, `--wsearch`, `--wreplace`, and `--wcfunc`. DeltaZulu.LogCluster implements none of these stages and mines input records as observed.
 

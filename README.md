@@ -26,13 +26,21 @@ This project is a C# implementation inspired by the LogCluster family of tools. 
 
 ## Build and test
 
+`DeltaZulu.Suggester` references `DeltaZulu.Normalize` through a git submodule, so clone with
+submodules (or initialize them on an existing checkout) before building:
+
 ```bash
+git clone --recurse-submodules https://github.com/DeltaZulu-OU/DeltaZulu.LogCluster.git
+# existing checkout: git submodule update --init --recursive
+
 dotnet restore
 
 dotnet build
 
 dotnet test
 ```
+
+See the [Development guide](docs/DEVELOPMENT.md) for details on the submodule dependency.
 
 ## Quick start
 
@@ -90,7 +98,7 @@ See [CLI reference](docs/CLI.md) for the complete option list and output schema.
 * **Stable anchors first** - recurring words that meet the support threshold form the backbone of each pattern, while lower-frequency regions become bounded gaps such as `*{1,2}`.
 * **Operational outputs** - text output is optimized for inspection, and JSON output is optimized for automation in platform workflows.
 * **Conservative parser generation** - liblognorm rules are marked executable only when variable gaps can be represented safely; ambiguous internal multi-word gaps remain sketches with warnings.
-* **Separated syntax ownership** - parser suggestions flow through the suggester abstraction; `DeltaZulu.Normalize` is the intended source of canonical liblognorm parser syntax once it is consumable as a package or shared project reference.
+* **Separated syntax ownership** - parser suggestions flow through the suggester abstraction; `DeltaZulu.Suggester` sources canonical liblognorm parser names, priorities, and validators from `DeltaZulu.Normalize` (consumed as a git submodule under `external/`), while the mining core stays independent of any parser-specific package.
 * **Scalable execution choices** - materialized and streaming strategies let users trade speed and memory use for different corpus sizes.
 
 ## References and acknowledgement

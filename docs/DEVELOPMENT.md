@@ -4,6 +4,28 @@
 
 Install the .NET 10 SDK. The project targets `net10.0`, enables nullable reference types and implicit usings, and uses centrally managed test package versions.
 
+### DeltaZulu.Normalize submodule
+
+`DeltaZulu.Suggester` consumes the canonical liblognorm parser catalog from
+[`DeltaZulu.Normalize`](https://github.com/DeltaZulu-OU/DeltaZulu.Normalize). Because that project
+is not published as a NuGet package, it is vendored as a git submodule at
+`external/DeltaZulu.Normalize` and referenced as a project. A fresh checkout must initialize the
+submodule before restoring, otherwise the referenced project file is missing:
+
+```bash
+git clone --recurse-submodules https://github.com/DeltaZulu-OU/DeltaZulu.LogCluster.git
+```
+
+For an existing checkout that was cloned without submodules:
+
+```bash
+git submodule update --init --recursive
+```
+
+CI checks out submodules automatically (`submodules: recursive` in the workflow). When
+`DeltaZulu.Normalize` is eventually published to a feed, the submodule and project reference can be
+replaced with a package reference.
+
 ## Project purpose
 
 DeltaZulu.LogCluster exists to bring LogCluster-style unstructured log mining into the .NET ecosystem used by DeltaZulu.Platform. The repository should stay usable as both a standalone CLI and a reusable engine for future platform integration. Design changes should preserve the human-in-the-loop contract: the miner suggests message skeletons and parser fields, while maintainers decide which suggestions are safe to adopt.
@@ -17,6 +39,7 @@ DeltaZulu.LogCluster.slnx   Solution file
 src/                        CLI and miner implementation
 tests/                      MSTest project
 docs/                       Documentation
+external/                   Vendored submodules (DeltaZulu.Normalize)
 ```
 
 ## Daily workflow
