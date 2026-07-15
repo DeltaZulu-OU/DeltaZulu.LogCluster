@@ -4,6 +4,9 @@ using System.Text.RegularExpressions;
 
 namespace DeltaZulu.Suggester;
 
+// Keep these motif names aligned with DeltaZulu.Normalize's canonical liblognorm
+// parser table. This local shim can be replaced once DeltaZulu.Normalize exposes
+// a consumable public syntax API for parser names and validators.
 public static partial class LiblognormMotifs
 {
     public const string DateIso = "date-iso";

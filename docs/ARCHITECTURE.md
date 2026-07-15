@@ -224,7 +224,7 @@ flowchart TD
     C --> F
     D --> F
     E --> F
-    A --> G[LiblognormMotifs]
+    A --> G[IGapSuggestionEngine]
     G --> H{Safe executable rule?}
     H -->|yes| I[liblognorm rule]
     H -->|no| J[review-only sketch + warnings]
@@ -234,6 +234,12 @@ flowchart TD
 ```
 
 The rule renderer is intentionally conservative. Single-token gaps can become specific parsers such as `word` or `ipv4` when samples support that choice. Multi-word gaps are only rendered as `rest` when doing so will not consume later anchors; otherwise the output remains a structural sketch with warnings.
+
+### Parser syntax ownership and DeltaZulu.Normalize
+
+The suggester deliberately keeps liblognorm parser motifs behind `IGapSuggestionEngine` rather than coupling the mining engine to a concrete syntax package. `DeltaZulu.Suggester` currently supplies a compatibility shim for liblognorm motif names and sample-recognition heuristics, while `DeltaZulu.LogCluster` remains responsible only for mining, scoring, and conservative rule placement.
+
+`DeltaZulu.Normalize` is the intended source for canonical liblognorm parser syntax. The planned integration is to consume Normalize from `DeltaZulu.Suggester` only, preserving the mining core's independence from parser-specific packages. See [Roadmap](ROADMAP.md) for the phased implementation plan and proposed catalog API.
 
 ## Materialized versus streaming execution
 
