@@ -28,8 +28,10 @@ public sealed class GapStatistics
 
     /// <summary>Gets the maximum number of words observed in the gap.</summary>
     public int MaxWords { get; private set; }
+
     /// <summary>Gets the minimum number of words observed in the gap.</summary>
     public int MinWords { get; private set; } = int.MaxValue;
+
     /// <summary>Gets the number of observations recorded for the gap.</summary>
     public int Observations { get; private set; }
 

@@ -1,4 +1,3 @@
-using DeltaZulu.LogCluster;
 using DeltaZulu.LogCluster.Cli;
 using DeltaZulu.Normalize;
 using DeltaZulu.Suggester;
@@ -421,65 +420,6 @@ public class LogClusterMinerTests
 [TestClass]
 public class LiblognormSuggestionEngineTests
 {
-    /// <summary>Catalog stub whose validation is fully controlled by the test.</summary>
-    private sealed class StubCatalog : ILiblognormParserCatalog
-    {
-        public IReadOnlyList<LiblognormParserDescriptor> Parsers { get; } =
-        [
-            new("alert-tag", Priority: 5, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
-            new("word", Priority: 32, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
-            new("configured", Priority: 8, LiblognormParserSuggestionUse.None, RequiresConfiguration: true),
-            new("rest", Priority: 255, LiblognormParserSuggestionUse.FallbackOnly, RequiresConfiguration: false),
-        ];
-
-        public string WordParserName => "word";
-
-        public string RestParserName => "rest";
-
-        public bool TryGetParser(string name, out LiblognormParserDescriptor parser)
-        {
-            parser = Parsers.FirstOrDefault(p => p.Name == name)!;
-            return parser is not null;
-        }
-
-        // Only "alert-tag" recognizes the literal sample "ALERT"; "word" recognizes anything.
-        public bool IsFullMatch(string parserName, ReadOnlySpan<char> sample) => parserName switch {
-            "alert-tag" => sample.SequenceEqual("ALERT"),
-            "word" => true,
-            _ => false,
-        };
-    }
-
-    [TestMethod]
-    public void FallbackAndWordParserNames_ComeFromCatalog()
-    {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
-
-        Assert.AreEqual("word", engine.WordParser);
-        Assert.AreEqual("rest", engine.RestParser);
-    }
-
-    [TestMethod]
-    public void Recognize_ReturnsOnlyInferableParsersThatFullMatchTheSample()
-    {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
-
-        // "alert-tag" full-matches "ALERT" and is inferable; "word" full-matches everything;
-        // "rest" is fallback-only and "configured" needs configuration, so neither is offered.
-        Assert.AreSequenceEqual(new[] { "alert-tag", "word" }, engine.Recognize("ALERT").ToArray());
-        Assert.AreSequenceEqual(new[] { "word" }, engine.Recognize("something-else").ToArray());
-    }
-
-    [TestMethod]
-    public void Priority_UsesCatalogDescriptorAndFallsBackToLowestPrecedence()
-    {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
-
-        Assert.AreEqual(5, engine.Priority("alert-tag"));
-        Assert.AreEqual(32, engine.Priority("word"));
-        Assert.AreEqual(int.MaxValue, engine.Priority("not-in-catalog"));
-    }
-
     [TestMethod]
     public void DefaultInstance_IsBackedByTheNormalizeCatalog()
     {
@@ -493,5 +433,63 @@ public class LiblognormSuggestionEngineTests
         Assert.Contains("ipv4", LiblognormSuggestionEngine.Instance.Recognize("10.0.0.1").ToArray());
         Assert.IsTrue(catalog.TryGetParser("ipv4", out var ipv4));
         Assert.AreEqual(ipv4.Priority, LiblognormSuggestionEngine.Instance.Priority("ipv4"));
+    }
+
+    [TestMethod]
+    public void FallbackAndWordParserNames_ComeFromCatalog()
+    {
+        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+
+        Assert.AreEqual("word", engine.WordParser);
+        Assert.AreEqual("rest", engine.RestParser);
+    }
+
+    [TestMethod]
+    public void Priority_UsesCatalogDescriptorAndFallsBackToLowestPrecedence()
+    {
+        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+
+        Assert.AreEqual(5, engine.Priority("alert-tag"));
+        Assert.AreEqual(32, engine.Priority("word"));
+        Assert.AreEqual(int.MaxValue, engine.Priority("not-in-catalog"));
+    }
+
+    [TestMethod]
+    public void Recognize_ReturnsOnlyInferableParsersThatFullMatchTheSample()
+    {
+        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+
+        // "alert-tag" full-matches "ALERT" and is inferable; "word" full-matches everything;
+        // "rest" is fallback-only and "configured" needs configuration, so neither is offered.
+        Assert.AreSequenceEqual(new[] { "alert-tag", "word" }, engine.Recognize("ALERT").ToArray());
+        Assert.AreSequenceEqual(new[] { "word" }, engine.Recognize("something-else").ToArray());
+    }
+
+    /// <summary>Catalog stub whose validation is fully controlled by the test.</summary>
+    private sealed class StubCatalog : ILiblognormParserCatalog
+    {
+        public IReadOnlyList<LiblognormParserDescriptor> Parsers { get; } =
+        [
+            new("alert-tag", Priority: 5, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
+            new("word", Priority: 32, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
+            new("configured", Priority: 8, LiblognormParserSuggestionUse.None, RequiresConfiguration: true),
+            new("rest", Priority: 255, LiblognormParserSuggestionUse.FallbackOnly, RequiresConfiguration: false),
+        ];
+
+        public string RestParserName => "rest";
+        public string WordParserName => "word";
+
+        // Only "alert-tag" recognizes the literal sample "ALERT"; "word" recognizes anything.
+        public bool IsFullMatch(string parserName, ReadOnlySpan<char> sample) => parserName switch {
+            "alert-tag" => sample.SequenceEqual("ALERT"),
+            "word" => true,
+            _ => false,
+        };
+
+        public bool TryGetParser(string name, out LiblognormParserDescriptor parser)
+        {
+            parser = Parsers.FirstOrDefault(p => p.Name == name)!;
+            return parser is not null;
+        }
     }
 }

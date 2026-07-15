@@ -13,9 +13,6 @@ public sealed class LiblognormSuggestionEngine : IGapSuggestionEngine
 {
     private readonly ILiblognormParserCatalog _catalog;
 
-    /// <summary>Gets a shared stateless instance backed by the default Normalize catalog.</summary>
-    public static LiblognormSuggestionEngine Instance { get; } = new(LiblognormParserCatalog.Instance);
-
     /// <summary>Initializes a new engine over the supplied parser catalog.</summary>
     /// <param name="catalog">The Normalize catalog that supplies parser metadata and validators.</param>
     public LiblognormSuggestionEngine(ILiblognormParserCatalog catalog)
@@ -24,11 +21,18 @@ public sealed class LiblognormSuggestionEngine : IGapSuggestionEngine
         _catalog = catalog;
     }
 
+    /// <summary>Gets a shared stateless instance backed by the default Normalize catalog.</summary>
+    public static LiblognormSuggestionEngine Instance { get; } = new(LiblognormParserCatalog.Instance);
+
+    /// <inheritdoc />
+    public string RestParser => _catalog.RestParserName;
+
     /// <inheritdoc />
     public string WordParser => _catalog.WordParserName;
 
     /// <inheritdoc />
-    public string RestParser => _catalog.RestParserName;
+    public int Priority(string parser) =>
+        _catalog.TryGetParser(parser, out var descriptor) ? descriptor.Priority : int.MaxValue;
 
     /// <inheritdoc />
     public IEnumerable<string> Recognize(string sample)
@@ -41,8 +45,4 @@ public sealed class LiblognormSuggestionEngine : IGapSuggestionEngine
             }
         }
     }
-
-    /// <inheritdoc />
-    public int Priority(string parser) =>
-        _catalog.TryGetParser(parser, out var descriptor) ? descriptor.Priority : int.MaxValue;
 }

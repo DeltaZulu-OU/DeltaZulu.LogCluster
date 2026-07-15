@@ -4,11 +4,10 @@ internal sealed class NullGapSuggestionEngine : IGapSuggestionEngine
 {
     public static NullGapSuggestionEngine Instance { get; } = new();
 
+    public string RestParser => "rest";
     public string WordParser => "word";
 
-    public string RestParser => "rest";
+    public int Priority(string parser) => 0;
 
     public IEnumerable<string> Recognize(string sample) => [];
-
-    public int Priority(string parser) => 0;
 }
