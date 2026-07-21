@@ -4,13 +4,15 @@
     <AssemblyName>DeltaZulu.Suggester</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="DeltaZulu.Parse" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\DeltaZulu.LogCluster\DeltaZulu.LogCluster.csproj" />
     <!--
-      DeltaZulu.Normalize is the canonical source of liblognorm parser syntax. It is not
+      DeltaZulu.Normalize is the canonical source of parser syntax. It is not
       published as a package, so it is consumed through the git submodule at
       external/DeltaZulu.Normalize. Initialize the submodule before restoring; see
       docs/DEVELOPMENT.md.
     -->
-    <ProjectReference Include="..\..\external\DeltaZulu.Normalize\src\DeltaZulu.Normalize\DeltaZulu.Normalize.csproj" />
   </ItemGroup>
 </Project>

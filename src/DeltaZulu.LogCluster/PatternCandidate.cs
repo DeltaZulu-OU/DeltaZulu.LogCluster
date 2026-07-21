@@ -170,7 +170,7 @@ internal sealed class PatternCandidate
             // number, so two unresolved gaps in the same candidate would otherwise both report
             // the same (stale) field value. gapIndex+1 also matches the 1-based "Gap N" label
             // Program.cs prints for candidate.Gaps in --verbose output.
-            warnings.Add($"Internal gap {gapIndex + 1} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable liblognorm parser.");
+            warnings.Add($"Internal gap {gapIndex + 1} spans {gap.MinWords}-{gap.MaxWords} words and cannot be rendered as an executable parser.");
             return;
         }
 

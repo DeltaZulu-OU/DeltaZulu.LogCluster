@@ -1,5 +1,5 @@
 using DeltaZulu.LogCluster.Cli;
-using DeltaZulu.Normalize;
+using DeltaZulu.Parse;
 using DeltaZulu.Suggester;
 
 namespace DeltaZulu.LogCluster.Tests;
@@ -18,7 +18,7 @@ public class LogClusterMinerTests
     public void GapStatistics_MultiWordGap_IsAlwaysForcedToRestRegardlessOfConfidence()
     {
         var dictionary = new TokenDictionary();
-        var gap = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance);
+        var gap = new GapStatistics(maxSamples: 8, SuggestionEngine.Instance);
         var first = dictionary.GetOrAdd("10", 0, 2);
         var second = dictionary.GetOrAdd("0", 0, 1);
         gap.Observe([first, second], dictionary);
@@ -34,7 +34,7 @@ public class LogClusterMinerTests
     [TestMethod]
     public void GapStatistics_NoObservations_ReturnsNullParserAndZeroConfidence()
     {
-        var output = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance).ToOutput();
+        var output = new GapStatistics(maxSamples: 8, SuggestionEngine.Instance).ToOutput();
 
         Assert.AreEqual(0, output.MinWords);
         Assert.AreEqual(0, output.MaxWords);
@@ -47,7 +47,7 @@ public class LogClusterMinerTests
     public void GapStatistics_SingleWordConsistentMotif_KeepsSpecificParserWithFullConfidence()
     {
         var dictionary = new TokenDictionary();
-        var gap = new GapStatistics(maxSamples: 8, LiblognormSuggestionEngine.Instance);
+        var gap = new GapStatistics(maxSamples: 8, SuggestionEngine.Instance);
         foreach (var address in new[] { "10.0.0.1", "10.0.0.2", "10.0.0.3" })
         {
             var token = dictionary.GetOrAdd(address, 0, address.Length);
@@ -77,8 +77,8 @@ public class LogClusterMinerTests
         var candidate = result.Candidates.Single(c => c.LogClusterPattern.StartsWith("Interface", StringComparison.Ordinal));
 
         Assert.IsFalse(candidate.IsExecutableRule);
-        Assert.Contains("/* unresolved gap:", candidate.LiblognormRule);
-        Assert.DoesNotContain("%field1:rest% down at node", candidate.LiblognormRule);
+        Assert.Contains("/* unresolved gap:", candidate.Pattern);
+        Assert.DoesNotContain("%field1:rest% down at node", candidate.Pattern);
         Assert.IsNotEmpty(candidate.RuleWarnings);
     }
 
@@ -294,11 +294,11 @@ public class LogClusterMinerTests
         var candidate = result.Candidates.Single();
 
         Assert.AreEqual("Interface down *{1,1}", candidate.LogClusterPattern);
-        Assert.AreEqual("Interface down %field1:word%", candidate.LiblognormRule);
+        Assert.AreEqual("Interface down %field1:word%", candidate.Pattern);
     }
 
     /// <summary>
-    /// Regression test for a labeling bug: AddRuleGap used the shared liblognorm field counter
+    /// Regression test for a labeling bug: AddRuleGap used the shared parser field counter
     /// to number unresolved-gap warnings, but unresolved gaps never advance that counter (they
     /// render as a comment, not a %fieldN% placeholder). Two unresolved gaps in the same
     /// candidate therefore produced two warnings both claiming to be about "Internal gap 1".
@@ -406,39 +406,39 @@ public class LogClusterMinerTests
         var result = new LogClusterMiner(options).Mine(records);
         var candidate = result.Candidates.Single(c => c.LogClusterPattern.StartsWith("Interface", StringComparison.Ordinal));
 
-        Assert.AreEqual("Interface Ethernet 1 /* unresolved gap: 0-1 words */ down at node %field1:word%", candidate.LiblognormRule);
-        Assert.Contains("Internal gap 4 spans 0-1 words and cannot be rendered as an executable liblognorm parser.", candidate.RuleWarnings.Single());
+        Assert.AreEqual("Interface Ethernet 1 /* unresolved gap: 0-1 words */ down at node %field1:word%", candidate.Pattern);
+        Assert.Contains("Internal gap 4 spans 0-1 words and cannot be rendered as an executable parser.", candidate.RuleWarnings.Single());
     }
 }
 
 /// <summary>
-/// Verifies that <see cref="LiblognormSuggestionEngine" /> is a thin adapter over the
+/// Verifies that <see cref="SuggestionEngine" /> is a thin adapter over the
 /// DeltaZulu.Normalize parser catalog: parser names, priorities, sample recognition, and
-/// full-match validation all come from <see cref="ILiblognormParserCatalog" /> rather than a
+/// full-match validation all come from <see cref="IParserCatalog" /> rather than a
 /// local motif shim.
 /// </summary>
 [TestClass]
-public class LiblognormSuggestionEngineTests
+public class SuggestionEngineTests
 {
     [TestMethod]
     public void DefaultInstance_IsBackedByTheNormalizeCatalog()
     {
-        var catalog = LiblognormParserCatalog.Instance;
+        var catalog = ParserCatalog.Instance;
 
-        Assert.AreEqual(catalog.WordParserName, LiblognormSuggestionEngine.Instance.WordParser);
-        Assert.AreEqual(catalog.RestParserName, LiblognormSuggestionEngine.Instance.RestParser);
+        Assert.AreEqual(catalog.WordParserName, SuggestionEngine.Instance.WordParser);
+        Assert.AreEqual(catalog.RestParserName, SuggestionEngine.Instance.RestParser);
 
         // The suggested parser for an IPv4 sample is validated by the real Normalize parser,
         // and its priority matches the catalog descriptor rather than any local constant.
-        Assert.Contains("ipv4", LiblognormSuggestionEngine.Instance.Recognize("10.0.0.1").ToArray());
+        Assert.Contains("ipv4", SuggestionEngine.Instance.Recognize("10.0.0.1").ToArray());
         Assert.IsTrue(catalog.TryGetParser("ipv4", out var ipv4));
-        Assert.AreEqual(ipv4.Priority, LiblognormSuggestionEngine.Instance.Priority("ipv4"));
+        Assert.AreEqual(ipv4.Priority, SuggestionEngine.Instance.Priority("ipv4"));
     }
 
     [TestMethod]
     public void FallbackAndWordParserNames_ComeFromCatalog()
     {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+        var engine = new SuggestionEngine(new StubCatalog());
 
         Assert.AreEqual("word", engine.WordParser);
         Assert.AreEqual("rest", engine.RestParser);
@@ -447,7 +447,7 @@ public class LiblognormSuggestionEngineTests
     [TestMethod]
     public void Priority_UsesCatalogDescriptorAndFallsBackToLowestPrecedence()
     {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+        var engine = new SuggestionEngine(new StubCatalog());
 
         Assert.AreEqual(5, engine.Priority("alert-tag"));
         Assert.AreEqual(32, engine.Priority("word"));
@@ -457,7 +457,7 @@ public class LiblognormSuggestionEngineTests
     [TestMethod]
     public void Recognize_ReturnsOnlyInferableParsersThatFullMatchTheSample()
     {
-        var engine = new LiblognormSuggestionEngine(new StubCatalog());
+        var engine = new SuggestionEngine(new StubCatalog());
 
         // "alert-tag" full-matches "ALERT" and is inferable; "word" full-matches everything;
         // "rest" is fallback-only and "configured" needs configuration, so neither is offered.
@@ -466,14 +466,14 @@ public class LiblognormSuggestionEngineTests
     }
 
     /// <summary>Catalog stub whose validation is fully controlled by the test.</summary>
-    private sealed class StubCatalog : ILiblognormParserCatalog
+    private sealed class StubCatalog : IParserCatalog
     {
-        public IReadOnlyList<LiblognormParserDescriptor> Parsers { get; } =
+        public IReadOnlyList<ParserDescriptor> Parsers { get; } =
         [
-            new("alert-tag", Priority: 5, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
-            new("word", Priority: 32, LiblognormParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
-            new("configured", Priority: 8, LiblognormParserSuggestionUse.None, RequiresConfiguration: true),
-            new("rest", Priority: 255, LiblognormParserSuggestionUse.FallbackOnly, RequiresConfiguration: false),
+            new("alert-tag", Priority: 5, ParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
+            new("word", Priority: 32, ParserSuggestionUse.InferFromSample, RequiresConfiguration: false),
+            new("configured", Priority: 8, ParserSuggestionUse.None, RequiresConfiguration: true),
+            new("rest", Priority: 255, ParserSuggestionUse.FallbackOnly, RequiresConfiguration: false),
         ];
 
         public string RestParserName => "rest";
@@ -486,7 +486,7 @@ public class LiblognormSuggestionEngineTests
             _ => false,
         };
 
-        public bool TryGetParser(string name, out LiblognormParserDescriptor parser)
+        public bool TryGetParser(string name, out ParserDescriptor parser)
         {
             parser = Parsers.FirstOrDefault(p => p.Name == name)!;
             return parser is not null;

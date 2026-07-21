@@ -1,28 +1,25 @@
 using DeltaZulu.LogCluster;
-using DeltaZulu.Normalize;
+using DeltaZulu.Parse;
 
 namespace DeltaZulu.Suggester;
 
 /// <summary>
-/// Gap suggestion engine that recognizes liblognorm parser motifs from mined samples.
-/// Parser names, priorities, and whole-sample validation are sourced from
-/// <see cref="DeltaZulu.Normalize.ILiblognormParserCatalog" /> so the suggester does not
-/// duplicate liblognorm parser syntax.
+/// Gap suggestion engine that recognizes parser motifs from mined samples.
 /// </summary>
-public sealed class LiblognormSuggestionEngine : IGapSuggestionEngine
+public sealed class SuggestionEngine : IGapSuggestionEngine
 {
-    private readonly ILiblognormParserCatalog _catalog;
+    private readonly IParserCatalog _catalog;
 
     /// <summary>Initializes a new engine over the supplied parser catalog.</summary>
     /// <param name="catalog">The Normalize catalog that supplies parser metadata and validators.</param>
-    public LiblognormSuggestionEngine(ILiblognormParserCatalog catalog)
+    public SuggestionEngine(IParserCatalog catalog)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         _catalog = catalog;
     }
 
     /// <summary>Gets a shared stateless instance backed by the default Normalize catalog.</summary>
-    public static LiblognormSuggestionEngine Instance { get; } = new(LiblognormParserCatalog.Instance);
+    public static SuggestionEngine Instance { get; } = new(ParserCatalog.Instance);
 
     /// <inheritdoc />
     public string RestParser => _catalog.RestParserName;

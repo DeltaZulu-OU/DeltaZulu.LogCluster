@@ -155,7 +155,7 @@ namespace DeltaZulu.LogCluster.Cli
         public static void PrintUsage() => Console.Error.WriteLine("""
         usage: logcluster [options] [file-or-directory ...]
 
-        Discovers recurring log message structures and suggests candidate liblognorm rules.
+        Discovers recurring log message structures and suggests candidate parser rules.
         Without file arguments, messages are read one per line from stdin.
 
           -s, --min-support <n>     minimum records that must contain a word or candidate (default: 2)
@@ -195,7 +195,7 @@ namespace DeltaZulu.LogCluster.Cli
 
         private static int Main(string[] args)
         {
-            var options = Parse(args) with { GapSuggestionEngine = LiblognormSuggestionEngine.Instance };
+            var options = Parse(args) with { GapSuggestionEngine = SuggestionEngine.Instance };
             if (options.ShowHelp)
             {
                 PrintUsage();
@@ -346,10 +346,10 @@ namespace DeltaZulu.LogCluster.Cli
                 {
                     Console.WriteLine($"Score {candidate.Score.Total:F1}  Support {candidate.Support}  Specificity {candidate.Specificity:F2}");
                     Console.WriteLine($"  LogCluster: {candidate.LogClusterPattern}");
-                    Console.WriteLine($"  Rule:       {candidate.LiblognormRule}");
+                    Console.WriteLine($"  Pattern:       {candidate.Pattern}");
                     if (!candidate.IsExecutableRule)
                     {
-                        Console.WriteLine("  Rule note:  structural sketch only; unresolved internal gaps make this non-executable as a liblognorm rule.");
+                        Console.WriteLine("  Pattern note:  structural sketch only; unresolved internal gaps make this non-executable as a rule.");
                     }
                     Console.WriteLine($"  Score parts support={candidate.Score.Support:F1}, anchors={candidate.Score.AnchorQuality:F1}, gaps={candidate.Score.GapConsistency:F1}, specificity={candidate.Score.PatternSpecificity:F1}");
                     if (options.Verbose)

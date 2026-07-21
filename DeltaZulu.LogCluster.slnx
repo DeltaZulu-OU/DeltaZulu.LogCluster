@@ -7,7 +7,4 @@
   <Folder Name="/tests/">
     <Project Path="tests/DeltaZulu.LogCluster.Tests.csproj" />
   </Folder>
-  <Folder Name="/external/">
-    <Project Path="external/DeltaZulu.Normalize/src/DeltaZulu.Normalize/DeltaZulu.Normalize.csproj" />
-  </Folder>
 </Solution>
