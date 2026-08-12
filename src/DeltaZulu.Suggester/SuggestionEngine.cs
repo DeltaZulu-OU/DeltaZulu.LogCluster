@@ -11,14 +11,14 @@ public sealed class SuggestionEngine : IGapSuggestionEngine
     private readonly IParserCatalog _catalog;
 
     /// <summary>Initializes a new engine over the supplied parser catalog.</summary>
-    /// <param name="catalog">The Normalize catalog that supplies parser metadata and validators.</param>
+    /// <param name="catalog">The Parse catalog that supplies parser metadata and validators.</param>
     public SuggestionEngine(IParserCatalog catalog)
     {
         ArgumentNullException.ThrowIfNull(catalog);
         _catalog = catalog;
     }
 
-    /// <summary>Gets a shared stateless instance backed by the default Normalize catalog.</summary>
+    /// <summary>Gets a shared stateless instance backed by the default Parse catalog.</summary>
     public static SuggestionEngine Instance { get; } = new(ParserCatalog.Instance);
 
     /// <inheritdoc />

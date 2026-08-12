@@ -235,11 +235,11 @@ flowchart TD
 
 The rule renderer is intentionally conservative. Single-token gaps can become specific parsers such as `word` or `ipv4` when samples support that choice. Multi-word gaps are only rendered as `rest` when doing so will not consume later anchors; otherwise the output remains a structural sketch with warnings.
 
-### Parser syntax ownership and DeltaZulu.Normalize
+### Parser syntax ownership and DeltaZulu.Parse
 
 The suggester deliberately keeps liblognorm parser motifs behind `IGapSuggestionEngine` rather than coupling the mining engine to a concrete syntax package. `DeltaZulu.LogCluster` remains responsible only for mining, scoring, and conservative rule placement, and depends on nothing beyond `IGapSuggestionEngine`.
 
-`DeltaZulu.Normalize` is the canonical source of liblognorm parser syntax. `DeltaZulu.Suggester.LiblognormSuggestionEngine` is a thin adapter over the public `ILiblognormParserCatalog` from `DeltaZulu.Normalize`: parser names (`WordParserName`, `RestParserName`), priorities, sample recognition, and whole-sample validation all come from `LiblognormParserCatalog.Instance`. The suggester no longer defines canonical parser names or validator logic locally. `DeltaZulu.Normalize` is referenced through a git submodule at `external/DeltaZulu.Normalize` because it is not yet published as a package; see the [Development guide](DEVELOPMENT.md). Only `DeltaZulu.Suggester` takes this dependency, preserving the mining core's independence from parser-specific packages. See [Roadmap](ROADMAP.md) for the phased plan and catalog API.
+`DeltaZulu.Parse` is the canonical source of liblognorm parser syntax. `DeltaZulu.Suggester.LiblognormSuggestionEngine` is a thin adapter over the public `ILiblognormParserCatalog` from `DeltaZulu.Parse`: parser names (`WordParserName`, `RestParserName`), priorities, sample recognition, and whole-sample validation all come from `LiblognormParserCatalog.Instance`. The suggester no longer defines canonical parser names or validator logic locally. `DeltaZulu.Parse` is referenced as a NuGet package; see the [Development guide](DEVELOPMENT.md). Only `DeltaZulu.Suggester` takes this dependency, preserving the mining core's independence from parser-specific packages. See [Roadmap](ROADMAP.md) for the phased plan and catalog API.
 
 ## Materialized versus streaming execution
 

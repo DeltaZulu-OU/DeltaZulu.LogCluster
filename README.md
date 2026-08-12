@@ -26,12 +26,10 @@ This project is a C# implementation inspired by the LogCluster family of tools. 
 
 ## Build and test
 
-`DeltaZulu.Suggester` references `DeltaZulu.Normalize` through a git submodule, so clone with
-submodules (or initialize them on an existing checkout) before building:
+`DeltaZulu.Suggester` references `DeltaZulu.Parse` as a NuGet package:
 
 ```bash
-git clone --recurse-submodules https://github.com/DeltaZulu-OU/DeltaZulu.LogCluster.git
-# existing checkout: git submodule update --init --recursive
+git clone https://github.com/DeltaZulu-OU/DeltaZulu.LogCluster.git
 
 dotnet restore
 
@@ -40,7 +38,7 @@ dotnet build
 dotnet test
 ```
 
-See the [Development guide](docs/DEVELOPMENT.md) for details on the submodule dependency.
+See the [Development guide](docs/DEVELOPMENT.md) for details on the package dependency.
 
 ## Quick start
 
@@ -98,7 +96,7 @@ See [CLI reference](docs/CLI.md) for the complete option list and output schema.
 * **Stable anchors first** - recurring words that meet the support threshold form the backbone of each pattern, while lower-frequency regions become bounded gaps such as `*{1,2}`.
 * **Operational outputs** - text output is optimized for inspection, and JSON output is optimized for automation in platform workflows.
 * **Conservative parser generation** - liblognorm rules are marked executable only when variable gaps can be represented safely; ambiguous internal multi-word gaps remain sketches with warnings.
-* **Separated syntax ownership** - parser suggestions flow through the suggester abstraction; `DeltaZulu.Suggester` sources canonical liblognorm parser names, priorities, and validators from `DeltaZulu.Normalize` (consumed as a git submodule under `external/`), while the mining core stays independent of any parser-specific package.
+* **Separated syntax ownership** - parser suggestions flow through the suggester abstraction; `DeltaZulu.Suggester` sources canonical liblognorm parser names, priorities, and validators from `DeltaZulu.Parse` (consumed as a NuGet package), while the mining core stays independent of any parser-specific package.
 * **Scalable execution choices** - materialized and streaming strategies let users trade speed and memory use for different corpus sizes.
 
 ## References and acknowledgement
@@ -116,7 +114,7 @@ Reference material:
 
 * [CLI reference](docs/CLI.md) - inputs, options, output formats, and examples.
 * [Architecture](docs/ARCHITECTURE.md) - mining pipeline, scoring, gaps, outliers, and scaling behavior.
-* [Roadmap](docs/ROADMAP.md) - prioritized phases for Normalize-backed parser suggestions and packaging workflow.
+* [Roadmap](docs/ROADMAP.md) - prioritized phases for Parse-backed parser suggestions and packaging workflow.
 * [Comparison with LogClusterC and Perl](docs/COMPARISON.md) - compatibility points and deliberate divergences from prior implementations.
 * [Development guide](docs/DEVELOPMENT.md) - repository layout, build/test workflow, and release notes.
 

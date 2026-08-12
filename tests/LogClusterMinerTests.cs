@@ -413,7 +413,7 @@ public class LogClusterMinerTests
 
 /// <summary>
 /// Verifies that <see cref="SuggestionEngine" /> is a thin adapter over the
-/// DeltaZulu.Normalize parser catalog: parser names, priorities, sample recognition, and
+/// DeltaZulu.Parse parser catalog: parser names, priorities, sample recognition, and
 /// full-match validation all come from <see cref="IParserCatalog" /> rather than a
 /// local motif shim.
 /// </summary>
@@ -421,14 +421,14 @@ public class LogClusterMinerTests
 public class SuggestionEngineTests
 {
     [TestMethod]
-    public void DefaultInstance_IsBackedByTheNormalizeCatalog()
+    public void DefaultInstance_IsBackedByTheParseCatalog()
     {
         var catalog = ParserCatalog.Instance;
 
         Assert.AreEqual(catalog.WordParserName, SuggestionEngine.Instance.WordParser);
         Assert.AreEqual(catalog.RestParserName, SuggestionEngine.Instance.RestParser);
 
-        // The suggested parser for an IPv4 sample is validated by the real Normalize parser,
+        // The suggested parser for an IPv4 sample is validated by the real Parse parser,
         // and its priority matches the catalog descriptor rather than any local constant.
         Assert.Contains("ipv4", SuggestionEngine.Instance.Recognize("10.0.0.1").ToArray());
         Assert.IsTrue(catalog.TryGetParser("ipv4", out var ipv4));

@@ -4,27 +4,13 @@
 
 Install the .NET 10 SDK. The project targets `net10.0`, enables nullable reference types and implicit usings, and uses centrally managed test package versions.
 
-### DeltaZulu.Normalize submodule
+### DeltaZulu.Parse package
 
 `DeltaZulu.Suggester` consumes the canonical liblognorm parser catalog from
-[`DeltaZulu.Normalize`](https://github.com/DeltaZulu-OU/DeltaZulu.Normalize). Because that project
-is not published as a NuGet package, it is vendored as a git submodule at
-`external/DeltaZulu.Normalize` and referenced as a project. A fresh checkout must initialize the
-submodule before restoring, otherwise the referenced project file is missing:
-
-```bash
-git clone --recurse-submodules https://github.com/DeltaZulu-OU/DeltaZulu.LogCluster.git
-```
-
-For an existing checkout that was cloned without submodules:
-
-```bash
-git submodule update --init --recursive
-```
-
-CI checks out submodules automatically (`submodules: recursive` in the workflow). When
-`DeltaZulu.Normalize` is eventually published to a feed, the submodule and project reference can be
-replaced with a package reference.
+[`DeltaZulu.Parse`](https://github.com/DeltaZulu-OU/DeltaZulu.Parse), referenced as a NuGet
+package (see `Directory.Packages.props` and
+`src/DeltaZulu.Suggester/DeltaZulu.Suggester.csproj`). Restoring the package requires access to the
+`deltazulu-github` package source mapped for the `DeltaZulu.*` pattern in `NuGet.config`.
 
 ## Project purpose
 
@@ -39,7 +25,6 @@ DeltaZulu.LogCluster.slnx   Solution file
 src/                        CLI and miner implementation
 tests/                      MSTest project
 docs/                       Documentation
-external/                   Vendored submodules (DeltaZulu.Normalize)
 ```
 
 ## Daily workflow

@@ -9,10 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\DeltaZulu.LogCluster\DeltaZulu.LogCluster.csproj" />
     <!--
-      DeltaZulu.Normalize is the canonical source of parser syntax. It is not
-      published as a package, so it is consumed through the git submodule at
-      external/DeltaZulu.Normalize. Initialize the submodule before restoring; see
-      docs/DEVELOPMENT.md.
+      DeltaZulu.Parse is the canonical source of parser syntax, consumed as a
+      NuGet package; see docs/DEVELOPMENT.md.
     -->
   </ItemGroup>
 </Project>
