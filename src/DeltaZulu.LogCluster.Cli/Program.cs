@@ -11,7 +11,7 @@ namespace DeltaZulu.LogCluster.Cli
         /// Parses command-line arguments into a mining configuration.
         /// </summary>
         /// <param name="args">The command-line arguments to parse.</param>
-        /// <returns>The parsed options, including <see cref="Error" /> when parsing fails.</returns>
+        /// <returns>The parsed options, including <see cref="LogClusterOptions.Error" /> when parsing fails.</returns>
         public static LogClusterOptions Parse(string[] args)
         {
             var options = new LogClusterOptions();
