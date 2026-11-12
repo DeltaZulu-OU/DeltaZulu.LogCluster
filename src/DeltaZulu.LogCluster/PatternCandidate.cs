@@ -7,7 +7,6 @@ internal sealed class PatternCandidate
     private readonly List<GapStatistics> _gaps = [];
     private readonly List<SeparatorStats> _separators = [];
     private readonly int[] anchors;
-    private long _lastSequence;
 
     public PatternCandidate(CandidateKey key, int[] anchors)
     {
@@ -105,16 +104,7 @@ internal sealed class PatternCandidate
         _separators[gapIndex].Observe(trailingSeparator);
     }
 
-    public void ObserveSupport(long sequenceNumber)
-    {
-        if (_lastSequence == sequenceNumber)
-        {
-            return;
-        }
-
-        _lastSequence = sequenceNumber;
-        Support++;
-    }
+    public void ObserveSupport() => Support++;
 
     /// <summary>
     /// Anchors dropped from either edge of a positionally-shifted variant that was merged into

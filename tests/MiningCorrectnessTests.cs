@@ -43,6 +43,23 @@ public class MiningCorrectnessTests
     }
 
     [TestMethod]
+    public void Mine_TokenIntroducedWithinFirstPassRecordWindowIsInfrequent()
+    {
+        var passes = 0;
+        IEnumerable<LogRecord> Source()
+        {
+            passes++;
+            yield return new LogRecord(0, passes == 1 ? "service ready" : "service newcomer", "test");
+            yield return new LogRecord(0, "service ready", "test");
+        }
+
+        var options = new LogClusterOptions { MinSupport = 2, ForceMaterialize = false, ShowOutliers = true };
+        var result = new LogClusterMiner(options).Mine(Source, estimatedInputBytes: 0);
+        Assert.AreEqual(2, result.RecordCount);
+        Assert.IsTrue(passes >= 3);
+    }
+
+    [TestMethod]
     public void Mine_OverlappingVariantGroupsNeverDuplicateSupport()
     {
         var records = new List<LogRecord>();

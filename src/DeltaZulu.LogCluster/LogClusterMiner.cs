@@ -149,7 +149,7 @@ public sealed class LogClusterMiner
                 candidate = new PatternCandidate(key, anchors);
                 candidates.Add(key, candidate);
             }
-            candidate.ObserveSupport(record.SequenceNumber);
+            candidate.ObserveSupport();
         }
         return candidates;
     }
