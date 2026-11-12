@@ -55,7 +55,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore packages
-        run: dotnet restore --locked-mode
+        run: dotnet restore
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
