@@ -78,7 +78,7 @@ internal sealed class PatternCandidate
         for (var i = 0; i < tokens.Length; i++)
         {
             var token = tokens[i];
-            if (frequentWords[token])
+            if ((uint)token < (uint)frequentWords.Length && frequentWords[token])
             {
                 var position = anchorsSeen;
                 anchorsSeen++;

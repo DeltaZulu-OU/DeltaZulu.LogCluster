@@ -7,7 +7,7 @@ internal static class AnchorBuffer
         var count = 0;
         foreach (var token in tokens)
         {
-            if (frequentWords[token])
+            if ((uint)token < (uint)frequentWords.Length && frequentWords[token])
             {
                 count++;
             }
@@ -21,7 +21,7 @@ internal static class AnchorBuffer
         var index = 0;
         foreach (var token in tokens)
         {
-            if (frequentWords[token])
+            if ((uint)token < (uint)frequentWords.Length && frequentWords[token])
             {
                 anchors[index++] = token;
             }

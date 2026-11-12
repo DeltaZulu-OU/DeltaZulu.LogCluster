@@ -82,6 +82,10 @@ public sealed class LogClusterMiner
         }
 
         var (frequentWords, recordCount) = DiscoverFrequentWords(tokenizedPass());
+        // A re-readable source may grow between passes; mine only the first pass's record count.
+        // The vocabulary is also fixed at this point: newly encountered tokens are infrequent.
+        var unrestrictedPass = tokenizedPass;
+        tokenizedPass = () => unrestrictedPass().Take(recordCount);
         var candidates = GenerateCandidates(tokenizedPass(), frequentWords);
         var routes = new Dictionary<CandidateKey, EvidenceRoute>();
         MergeShiftedCandidates(candidates, routes);
