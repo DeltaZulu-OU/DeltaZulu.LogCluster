@@ -170,6 +170,7 @@ public sealed class LogClusterMiner
     private static void MergeLowDiversityVariants(Dictionary<CandidateKey, PatternCandidate> candidates, Dictionary<CandidateKey, EvidenceRoute> routes, double threshold)
     {
         var alreadyEdgeMerged = new HashSet<PatternCandidate>(routes.Keys.Select(k => candidates[k]));
+        var mergeTargets = new HashSet<PatternCandidate>();
 
         var groups = new Dictionary<(int Position, CandidateKey Template), List<PatternCandidate>>();
         foreach (var candidate in candidates.Values.Distinct())
@@ -193,7 +194,7 @@ public sealed class LogClusterMiner
         foreach (var group in groups.OrderBy(g => g.Key.Position).ThenBy(g => g.Key.Template.ToString(), StringComparer.Ordinal))
         {
             var position = group.Key.Position;
-            var live = group.Value.Where(c => candidates.TryGetValue(c.Key, out var current) && current == c).Distinct().ToArray();
+            var live = group.Value.Where(c => !mergeTargets.Contains(c) && candidates.TryGetValue(c.Key, out var current) && current == c).Distinct().ToArray();
             if (live.Length < 2)
             {
                 continue;
@@ -224,6 +225,7 @@ public sealed class LogClusterMiner
                 routes[member.Key] = new EvidenceRoute(Leading: 0, Trailing: 0, AbsorbedPositions: new HashSet<int> { position });
             }
             candidates[mergedKey] = merged;
+            mergeTargets.Add(merged);
         }
     }
 
