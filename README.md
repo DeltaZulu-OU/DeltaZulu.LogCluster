@@ -114,7 +114,7 @@ Reference material:
 
 * [CLI reference](docs/CLI.md) - inputs, options, output formats, and examples.
 * [Architecture](docs/ARCHITECTURE.md) - mining pipeline, scoring, gaps, outliers, and scaling behavior.
-* [Roadmap](docs/ROADMAP.md) - prioritized phases for Parse-backed parser suggestions and packaging workflow.
+* [Roadmap](https://github.com/DeltaZulu-OU/docs/blob/master/roadmaps/DeltaZulu.LogCluster-ROADMAP.md) - centralized correctness, parser suggestions and packaging roadmap.
 * [Comparison with LogClusterC and Perl](docs/COMPARISON.md) - compatibility points and deliberate divergences from prior implementations.
 * [Development guide](docs/DEVELOPMENT.md) - repository layout, build/test workflow, and release notes.
 
