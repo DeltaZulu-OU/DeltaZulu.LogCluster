@@ -174,7 +174,7 @@ public sealed class LogClusterMiner
         var groups = new Dictionary<(int Position, CandidateKey Template), List<PatternCandidate>>();
         foreach (var candidate in candidates.Values.Distinct())
         {
-            if (candidate.AnchorCount == 0 || alreadyEdgeMerged.Contains(candidate) || candidates[candidate.Key] != candidate)
+            if (candidate.AnchorCount == 0 || alreadyEdgeMerged.Contains(candidate) || (!candidates.TryGetValue(candidate.Key, out var current) || current != candidate))
             {
                 continue;
             }
@@ -193,7 +193,7 @@ public sealed class LogClusterMiner
         foreach (var group in groups.OrderBy(g => g.Key.Position).ThenBy(g => g.Key.Template.ToString(), StringComparer.Ordinal))
         {
             var position = group.Key.Position;
-            var live = group.Value.Where(c => candidates[c.Key] == c).Distinct().ToArray();
+            var live = group.Value.Where(c => candidates.TryGetValue(c.Key, out var current) && current == c).Distinct().ToArray();
             if (live.Length < 2)
             {
                 continue;
