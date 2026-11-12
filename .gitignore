@@ -377,5 +377,4 @@ FodyWeavers.xsd
 *.db-wal
 *.db.wal
 
-# Lock file
-packages.lock.json
+# NuGet lock files are committed to enforce locked-mode restores.
