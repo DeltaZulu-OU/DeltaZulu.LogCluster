@@ -24,6 +24,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,6 +54,21 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+
+      - name: Authenticate GitHub Packages
+        shell: pwsh
+        env:
+          PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget update source deltazulu-github --username "${{ github.actor }}" --password "$env:PACKAGES_TOKEN" --store-password-in-clear-text --configfile NuGet.config
+
+      - name: Verify committed NuGet lock files
+        shell: pwsh
+        run: |
+          $projects = @(Get-ChildItem src,tests -Recurse -Filter *.csproj)
+          foreach ($project in $projects) {
+            $lock = Join-Path $project.DirectoryName 'packages.lock.json'
+            if (-not (Test-Path $lock)) { throw "Missing committed NuGet lock file: $lock" }
+          }
 
       - name: Restore packages
         run: dotnet restore --locked-mode
