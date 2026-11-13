@@ -10,7 +10,19 @@ Install the .NET 10 SDK. The project targets `net10.0`, enables nullable referen
 [`DeltaZulu.Parse`](https://github.com/DeltaZulu-OU/DeltaZulu.Parse), referenced as a NuGet
 package (see `Directory.Packages.props` and
 `src/DeltaZulu.Suggester/DeltaZulu.Suggester.csproj`). Restoring the package requires access to the
-`deltazulu-github` package source mapped for the `DeltaZulu.*` pattern in `NuGet.config`.
+`deltazulu-github` package source mapped for the `DeltaZulu.*` pattern in `NuGet.config`. Its endpoint is `https://nuget.pkg.github.com/DeltaZulu-OU/index.json`. The repository config defines the source, but does not store credentials.
+
+For a local clean checkout, authenticate using a GitHub personal access token (classic) with `read:packages` and access to the DeltaZulu.Parse package. The command below refers to `GITHUB_PACKAGES_TOKEN`, set locally as an environment variable; do not commit the token or a credential-bearing NuGet.config.
+
+```bash
+dotnet nuget update source deltazulu-github --username YOUR_GITHUB_USERNAME --password "$GITHUB_PACKAGES_TOKEN" --store-password-in-clear-text --configfile NuGet.config
+```
+
+On PowerShell, the equivalent one-line command is `dotnet nuget update source deltazulu-github --username YOUR_GITHUB_USERNAME --password $env:GITHUB_PACKAGES_TOKEN --store-password-in-clear-text --configfile NuGet.config`. The clear-text option persists credentials in the **local** config and is appropriate only for an isolated checkout that is never committed or redistributed. Prefer local user-level credential storage where available.
+
+In GitHub Actions, `.github/workflows/unit-tests.yml` requests `packages: read` and injects `GITHUB_TOKEN` immediately before restore. The package owner must grant this repository's Actions workflow access to the package; `packages: read` alone does not grant cross-repository access. Fork pull-request tokens may not be entitled to private/internal packages and should not be worked around by exposing a privileged secret to untrusted code.
+
+Dependency lock files belong beside each project and must be committed. To refresh locks intentionally, use `dotnet restore --force-evaluate` in an authenticated working copy, review changes to all `packages.lock.json` files, commit them, then check with `dotnet restore --locked-mode`. The CI workflow rejects missing lock files before restoring and must also fail if the committed graph is stale.
 
 ## Project purpose
 
