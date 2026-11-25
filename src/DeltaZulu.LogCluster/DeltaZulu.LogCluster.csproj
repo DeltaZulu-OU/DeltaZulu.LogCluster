@@ -3,4 +3,7 @@
     <RootNamespace>DeltaZulu.LogCluster</RootNamespace>
     <AssemblyName>DeltaZulu.LogCluster</AssemblyName>
   </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="DeltaZulu.LogCluster.Tests" />
+  </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@ public sealed record LogClusterOptions
     public int MaxCandidates { get; init; } = 50;
     /// <summary>Gets the maximum number of distinct examples retained for each variable gap.</summary>
     public int MaxSamplesPerGap { get; init; } = 8;
-    /// <summary>Gets the maximum number of records accepted before mining aborts.</summary>
+    /// <summary>Gets the maximum number of records accepted before mining aborts (up to Int32.MaxValue).</summary>
     public long MaxRecords { get; init; } = 5_000_000;
     /// <summary>Gets the maximum total input size, in message characters, accepted before mining aborts.</summary>
     public long MaxInputBytes { get; init; } = 2_147_483_648;

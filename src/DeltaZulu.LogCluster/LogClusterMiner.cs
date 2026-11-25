@@ -13,6 +13,7 @@ public sealed class LogClusterMiner
     /// <param name="options">The mining options to apply.</param>
     public LogClusterMiner(LogClusterOptions options)
     {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(options.MaxRecords, int.MaxValue, nameof(options.MaxRecords));
         this.options = options;
     }
 

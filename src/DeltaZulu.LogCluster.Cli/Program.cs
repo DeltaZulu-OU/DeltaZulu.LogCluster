@@ -57,9 +57,9 @@ namespace DeltaZulu.LogCluster.Cli
                         break;
 
                     case "--max-records":
-                        if (++i >= args.Length || !long.TryParse(args[i], NumberStyles.None, CultureInfo.InvariantCulture, out var maxRecords) || maxRecords < 1)
+                        if (++i >= args.Length || !int.TryParse(args[i], NumberStyles.None, CultureInfo.InvariantCulture, out var maxRecords) || maxRecords < 1)
                         {
-                            return options with { Error = "maximum records must be a positive integer" };
+                            return options with { Error = "maximum records must be between 1 and 2147483647" };
                         }
 
                         options = options with { MaxRecords = maxRecords };
@@ -161,7 +161,7 @@ namespace DeltaZulu.LogCluster.Cli
           -s, --min-support <n>     minimum records that must contain a word or candidate (default: 2)
           -n, --max-candidates <n>  maximum candidates to print (default: 50)
               --max-samples <n>     bounded samples to retain per variable gap (default: 8)
-              --max-records <n>     abort if input exceeds this many records (default: 5000000)
+              --max-records <n>     abort if input exceeds this many records (1–2147483647, default: 5000000)
               --max-input-bytes <n> abort if input exceeds this many bytes (default: 2147483648)
               --materialize         force loading all records into memory (skip the streaming heuristic)
               --stream              force the re-read-from-disk streaming strategy

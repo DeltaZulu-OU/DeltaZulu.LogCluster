@@ -19,11 +19,11 @@ internal static class CandidateScorer
     /// <returns>The total and component scores for the candidate.</returns>
     public static CandidateScore Score(int support, int recordCount, int anchorCount, IReadOnlyList<GapOutput> gaps, double weightSupport, double weightAnchor, double weightGapConsistency, double weightSpecificity)
     {
-        var supportStrength = Math.Min(100, 100.0 * Math.Log(1 + support) / Math.Log(1 + recordCount));
+        var supportStrength = Math.Min(100, 100.0 * Math.Log(1.0 + support) / Math.Log(1.0 + recordCount));
         var anchorQuality = Math.Min(100, anchorCount * 20.0);
         var variableGaps = gaps.Where(g => g.MaxWords > 0).ToArray();
         var gapConsistency = variableGaps.Length == 0 ? 100 : variableGaps.Average(g => g.MinWords == g.MaxWords ? 100 : 60 + (40.0 * g.MinWords / Math.Max(1, g.MaxWords)));
-        var specificity = 100.0 * anchorCount / Math.Max(1, anchorCount + variableGaps.Length);
+        var specificity = 100.0 * anchorCount / Math.Max(1.0, (double)anchorCount + variableGaps.Length);
         var total = (supportStrength * weightSupport) + (anchorQuality * weightAnchor) + (gapConsistency * weightGapConsistency) + (specificity * weightSpecificity);
         return new CandidateScore(total, supportStrength, anchorQuality, gapConsistency, specificity);
     }

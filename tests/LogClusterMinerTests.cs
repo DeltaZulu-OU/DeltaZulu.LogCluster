@@ -7,6 +7,25 @@ namespace DeltaZulu.LogCluster.Tests;
 [TestClass]
 public class LogClusterMinerTests
 {
+    [TestMethod]
+    public void MaximumRecordCountProducesFiniteSupportScore()
+    {
+        var score = CandidateScorer.Score(int.MaxValue, int.MaxValue, 1, [], 1, 0, 0, 0);
+        Assert.AreEqual(100.0, score.Total, 0.000001);
+    }
+
+    [TestMethod]
+    public void RecordLimitAboveCounterCapacityIsRejectedBeforeMining()
+    {
+        var options = new LogClusterOptions { MaxRecords = (long)int.MaxValue + 1 };
+        Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new LogClusterMiner(options));
+        Assert.IsNotNull(Program.Parse(["--max-records", "2147483648"]).Error);
+        var maximum = Program.Parse(["--max-records", "2147483647"]);
+        Assert.IsNull(maximum.Error);
+        Assert.AreEqual((long)int.MaxValue, maximum.MaxRecords);
+        Assert.IsNotNull(new LogClusterMiner(maximum));
+    }
+
     /// <summary>
     /// No motif regex tolerates the internal space a 2+-word sample always contains once
     /// joined, so a gap that ever sees 2+ words can never accumulate a parser vote for that

@@ -145,7 +145,7 @@ internal sealed class PatternCandidate
         var renderedGaps = _gaps.Select(g => g.ToOutput()).ToArray();
         var separators = _separators.Select(s => s.Modal()).ToArray();
         var score = CandidateScorer.Score(Support, recordCount, anchors.Length, renderedGaps, options.WeightSupport, options.WeightAnchor, options.WeightGapConsistency, options.WeightSpecificity);
-        var specificity = anchors.Length / (double)Math.Max(1, anchors.Length + renderedGaps.Count(g => g.MaxWords > 0));
+        var specificity = anchors.Length / (double)Math.Max(1.0, (double)anchors.Length + renderedGaps.Count(g => g.MaxWords > 0));
         return new CandidateOutput(
             Support,
             specificity,
