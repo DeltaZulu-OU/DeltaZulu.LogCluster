@@ -1,29 +1,19 @@
 # DeltaZulu.LogCluster — documentation
 
-Architecture, Decisions, Constraints and roadmaps for the DeltaZulu estate live
-in **[`DeltaZulu-OU/docs`](https://github.com/DeltaZulu-OU/docs)**, not here.
+Estate-wide architectural policy, Constraints, the current target and planning are maintained in [DeltaZulu-OU/docs](https://github.com/DeltaZulu-OU/docs). Local documents describe source, interfaces and historical reasoning; they do not override Accepted Decisions.
 
 | Looking for | Go to |
 |---|---|
-| Decisions governing this repository | [`architecture/GOVERNING-DECISIONS.md`](https://github.com/DeltaZulu-OU/docs/blob/main/architecture/GOVERNING-DECISIONS.md) |
-| The estate-wide pipeline architecture | [`architecture/PIPELINE.md`](https://github.com/DeltaZulu-OU/docs/blob/main/architecture/PIPELINE.md) — read with `PIPELINE-ERRATA.md` |
-| Facts the estate does not control | [`constraints/`](https://github.com/DeltaZulu-OU/docs/tree/main/constraints) |
-| This repository's historical ADRs | [`archive/DeltaZulu.LogCluster/`](https://github.com/DeltaZulu-OU/docs/tree/main/archive/DeltaZulu.LogCluster) |
-| Roadmaps | [`roadmaps/`](https://github.com/DeltaZulu-OU/docs/tree/main/roadmaps) |
-| Verification evidence | [`reports/`](https://github.com/DeltaZulu-OU/docs/tree/main/reports) |
+| Current target | [NRT pipeline](https://github.com/DeltaZulu-OU/docs/blob/master/architecture/NRT-PIPELINE.md) |
+| Governing Decisions | [Decision index](https://github.com/DeltaZulu-OU/docs/blob/master/architecture/GOVERNING-DECISIONS.md) |
+| Constraints and qualifications | [Constraints](https://github.com/DeltaZulu-OU/docs/tree/master/constraints) |
+| Active work | [Consolidated roadmap](https://github.com/DeltaZulu-OU/docs/blob/master/roadmaps/CONSISTENCY-CORRECTNESS-ROADMAP.md) (C15) |
+| Historical architecture | [Pipeline import](https://github.com/DeltaZulu-OU/docs/blob/master/architecture/PIPELINE.md) with [errata](https://github.com/DeltaZulu-OU/docs/blob/master/architecture/PIPELINE-ERRATA.md) |
+| Historical ADRs | [Archive](https://github.com/DeltaZulu-OU/docs/tree/master/archive) |
+| Dated verification evidence | [Reports](https://github.com/DeltaZulu-OU/docs/tree/master/reports) |
 
-Decisions are numbered globally across the estate. The per-repository scheme this
-replaced produced collisions that citations could not resolve — `DeltaZulu.Agent`
-ADR 0014 and `DeltaZulu.Platform` ADR 0014 decide opposite things, and the Agent
-carried two different ADR 0003 documents, so "ADR 0003" did not resolve even
-within one repository.
+## Local scope
 
-## What remains here
+Local architecture, CLI, comparison and development guides remain implementation references. The mining core and Parse-backed suggestion adapter remain distinct. Current work and parity/counter/rendering verification belong to C15; imported priority and completion claims are historical.
 
-- `ARCHITECTURE.md`, `CLI.md`, `COMPARISON.md`, `DEVELOPMENT.md`.
-
-`ROADMAP.md` has moved to the docs repository. Two corrections were attached to
-it there: it proposes a `LiblognormParserDescriptor` type where Parse shipped
-`ParserDescriptor`, and dropping the `v2-iptables` or `cisco-interface-spec`
-motifs costs 20 cases of committed parity coverage rather than the 1 an earlier
-undercount suggested.
+Only tested behavior is verified; a target architecture or historical report is not proof of current runtime conformance.
