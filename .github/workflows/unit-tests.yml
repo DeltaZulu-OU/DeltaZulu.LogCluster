@@ -57,7 +57,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
+          global-json-file: global.json
 
       - name: Report restore environment
         run: |
@@ -69,12 +69,11 @@ jobs:
           NuGetPackageSourceCredentials_deltazulu-github: Username=${{ github.actor }};Password=${{ secrets.GITHUB_TOKEN }};ValidAuthenticationTypes=Basic
         run: dotnet restore --locked-mode --verbosity normal
 
-      - name: Upload restored lockfiles for review
-        uses: actions/upload-artifact@v4
-        with:
-          name: restored-lockfiles-${{ matrix.os }}
-          path: '**/packages.lock.json'
-          if-no-files-found: error
+      - name: Verify restore did not create or change lockfiles
+        shell: pwsh
+        run: |
+          $changes = git status --porcelain --untracked-files=all -- ':(glob)**/packages*.lock.json'
+          if ($changes) { $changes | Write-Output; throw 'Restore changed the committed dependency locks.' }
 
       - name: Build
         run: dotnet build --configuration Release --no-restore

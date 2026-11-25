@@ -4,6 +4,8 @@
     <RootNamespace>DeltaZulu.LogCluster.Cli</RootNamespace>
     <AssemblyName>logcluster</AssemblyName>
     <PublishAot>true</PublishAot>
+    <!-- Native AOT restores include the SDK host RID's compiler package. -->
+    <NuGetLockFilePath>packages.$(NETCoreSdkPortableRuntimeIdentifier).lock.json</NuGetLockFilePath>
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>

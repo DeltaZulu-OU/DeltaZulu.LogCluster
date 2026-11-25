@@ -97,3 +97,7 @@ dotnet publish src -c Release -r linux-x64 --self-contained true
 ```
 
 Change the runtime identifier for other platforms, for example `win-x64` or `osx-arm64`.
+
+## Reproducible restore
+
+The SDK is pinned by `global.json`; CI installs that exact SDK and uses locked restore. Portable projects share a normal `packages.lock.json`. The Native AOT CLI uses one lock per SDK host RID because the compiler runtime package is host-specific; the committed locks cover the Linux x64, Windows x64 and macOS ARM64 test matrix. Additional host/publish targets need reviewed locks and validation. Refresh intentionally with `dotnet restore --force-evaluate` on each supported host, review package changes, then run locked restore and tests. CI must not create or modify locks silently. The DeltaZulu feed is explicitly mapped to DeltaZulu.* packages; authenticate using read-only package access. No fallback feed is configured for these packages.

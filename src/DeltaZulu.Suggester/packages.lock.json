@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "DeltaZulu.Parse": {
+        "type": "Direct",
+        "requested": "[0.1.1, )",
+        "resolved": "0.1.1",
+        "contentHash": "3gGYQYV8A1d2RVVYrXnt5EM8Pn21auuHDeMySZTh58uiasDqO1VSkcT2z0WN+hV0EQRoM26tT2HSsBl9CvQ3vw=="
+      },
+      "deltazulu.logcluster": {
+        "type": "Project"
+      }
+    }
+  }
+}
